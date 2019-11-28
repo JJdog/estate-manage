@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: ESTATE-MANAGE
+
+server:
+  port: 14000
+  servlet:
+    context-path: /estate
+
+
+---
+# nacos 配置
+spring:
+  cloud:
+    nacos:
+      discovery:
+#        server-addr: 192.168.100.222:8848
+        cluster-name: lanswon
+#        server-addr: jaswine.top:8848
+        server-addr: 192.168.44.78:8848
+---
+spring:
+  datasource:
+    druid:
+      driver-class-name: com.mysql.jdbc.Driver
+      url: jdbc:mysql://rm-uf6uj9b175xy597fl3o.mysql.rds.aliyuncs.com:3306/estate?characterEncoding=utf8&useSSL=false
+      username: jaswine
+      password: Jasmine1017
+      max-active: 10
+      initial-size: 5
+      min-idle: 2
+      max-wait: 60000
+      pool-prepared-statements: true
+      web-stat-filter:
+        enabled: true
+        url-pattern: /druid
+
+mybatis-plus:
+  mapper-locations: classpath:mappers/*.xml
+  check-config-location: true
+  type-aliases-package: com.lanswon.estate.bean.pojo
+  configuration:
+    jdbc-type-for-null: null
+    cache-enabled: false
+    multiple-result-sets-enabled: true
+    default-executor-type: reuse
+    lazy-loading-enabled: false
+    aggressive-lazy-loading: true
+    default-statement-timeout: 3000
+    call-setters-on-nulls: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+    auto-mapping-behavior: partial
+    auto-mapping-unknown-column-behavior: none
+    default-enum-type-handler: org.apache.ibatis.type.EnumTypeHandler
+    return-instance-for-empty-row: false
+    local-cache-scope: session
+---
+logging:
+  level:
+    com.lanswon.estate : debug

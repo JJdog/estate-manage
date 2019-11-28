@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanswon.estate.mapper.ReportMapper">
+
+
+    <select id="getRentReport" resultType="java.lang.Object">
+        SELECT sum(t.must_charge) FROM money_rent_must t WHERE t.is_enable =1 GROUP BY  date(t.rent_date)
+    </select>
+    <select id="getHouseReportByDate" resultType="com.lanswon.estate.bean.vo.MonthRentChargeVO">
+        SELECT count(t.is_new_rent) AS dealNum,
+            sum(t1.resource_area) AS rentArea
+        FROM deal t
+            LEFT JOIN house_resource t1 ON t.fk_house_resource_id = t1.id
+        WHERE date(t.start_time) = date(#{date})
+        GROUP BY t.is_new_rent
+    </select>
+    <select id="getHouseAssetsReport" resultType="com.lanswon.estate.bean.vo.report.ReportHouseAssetsVO">
+        SELECT t1.name AS agencyName,
+            count(t.id) AS houseAssetsNum,
+            sum(t.build_area) AS totalBuildArea,
+            sum(t.real_area) AS totalRealArea,
+            sum(t.other_area) AS totalOtherArea
+        FROM house_assets t
+        LEFT JOIN dic_agency t1 ON t.fk_agency_id = t1.id
+        WHERE t.fk_agency_id = #{id}
+    </select>
+    <select id="getHouseResourceReport" resultType="com.lanswon.estate.bean.vo.report.ReportHouseResourceVO">
+        SELECT date_format(t1.start_time,'%Y-%m') AS month, count(t1.id) AS totalRentedResourceNum, sum(t.resource_area) AS totalRentedResourceArea
+        FROM house_resource t
+                 LEFT JOIN deal t1
+                           ON t1.fk_house_resource_id = t.id
+        WHERE date(t1.start_time )BETWEEN date(#{cd.startDate} ) AND date(#{cd.endStart})
+          AND t.fk_agency_id = #{id}
+        GROUP BY date_format(t1.start_time,'%Y-%m');
+    </select>
+</mapper>
+    

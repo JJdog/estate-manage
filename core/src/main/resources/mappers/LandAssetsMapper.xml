@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanswon.estate.mapper.LandAssetsMapper">
+
+    <select id="getLandAssetsPageList" resultType="com.lanswon.estate.bean.vo.LandAssetsVO">
+        SELECT
+        t.id,
+        t.assets_name,
+        t.fk_own_id ,
+        t1.name AS owner,
+        t.assets_location,
+        t.land_num,
+        t.pic_num,
+        t.use_type AS useTypeCode,
+        t2.name AS useType,
+        t.money,
+        t.use_right AS useRightCode,
+        t3.name AS useRight,
+        t.end_time,
+        t.assets_queue,
+        t.self_queue,
+        t.share_queue,
+        t.remark
+        FROM land_assets t
+        LEFT JOIN dic_assets_co t1 ON t.fk_own_id = t1.id
+        LEFT JOIN dic_land_usage t2 ON t.use_type = t2.id
+        LEFT JOIN dic_land_nature t3 ON t.use_right = t3.id
+        WHERE 1=1
+        <if test="cd.ownId != 0 ">
+            AND t.fk_own_id = #{cd.ownId}
+        </if>
+
+        <if test="cd.landNum != 0">
+            AND t.land_num = #{cd.landNum}
+        </if>
+
+        <if test="cd.location != ''">
+            AND t.assets_location = #{cd.location}
+        </if>
+
+        <if test="asc == 0">
+            ORDER BY t.created_time DESC
+        </if>
+        <if test="asc == 1">
+            ORDER BY t.created_time ASC
+        </if>
+
+    </select>
+</mapper>
+    

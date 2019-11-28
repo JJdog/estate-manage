@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanswon.estate.mapper.poi.PoiTransFlowMapper">
+
+
+    <select id="getRealMoney" resultType="com.lanswon.estate.bean.po.PoiTransFlow">
+        SELECT group_concat(
+                       concat(t3.name,
+                              t2.park,
+                              t2.build_no,
+                              '号楼',
+                              t2.build_level,
+                              '层',
+                              t2.build_room) SEPARATOR ','
+                   )                                           AS houseLocation,
+               concat(t5.rent_date, '预收', t.pay_type, '个月租金')  AS moneyType,
+               t3.name                                         AS agencyName,
+               t4.name                                         AS renter,
+               t5.id                                           AS fkMustMoneyId,
+               concat('Z-',
+                      t.deal_serial,
+                      '-',
+                      DATE_FORMAT(date(t5.rent_date), '%Y%m')) AS mustMoneyNum,
+               t5.rent_date                                    AS moneyDate,
+               t5.must_charge                                  AS mustMoney,
+               t6.money                                        AS realMoney
+        FROM deal t
+                 LEFT JOIN mid_deal_house t1 ON t.id = t1.fk_deal_id
+                 LEFT JOIN house_resource t2 ON t2.id = t1.fk_house_resource_id
+                 LEFT JOIN dic_agency t3 ON t2.fk_agency_id = t3.id
+                 LEFT JOIN renter t4 ON t.fk_renter_id = t4.id
+                 LEFT JOIN money_rent_must t5 ON t5.fk_deal_id = t.id
+                 LEFT JOIN money_real_flow t6 ON t6.fk_must_money_id = t5.id
+        WHERE date(t5.rent_date) = date(#{date})
+
+    </select>
+</mapper>
+    

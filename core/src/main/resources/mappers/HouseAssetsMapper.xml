@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanswon.estate.mapper.HouseAssetsMapper">
+    <select id="getHouseAssetsListPage" resultType="com.lanswon.estate.bean.vo.HouseAssetsVO">
+        SELECT t.id,
+        t.created_time,
+        t.updated_time,
+        t.created_by,
+        t.updated_by,
+        t.house_id,
+        t.location,
+        t.assets_name,
+        t.fk_own_id AS fkOwnerId,
+        t3.name AS owner,
+        t.fk_house_share_id AS houseShareId,
+        t1.name AS houseShare,
+        t.fk_agency_id AS agencyId,
+        t2.name AS agency,
+        t.fk_house_nature AS houseNatureId,
+        t6.name AS houseNature,
+        t.fk_house_usage AS houseUsageId,
+        t5.name AS houseUsage,
+        t.total_level,
+        t.build_area,
+        t.real_area,
+        t.other_area,
+        t.fk_land_assets_id AS landAssetsId,
+        t4.land_num,
+        t.register_time,
+        t.remark
+        FROM house_assets t
+        LEFT JOIN dic_house_share t1 ON t.fk_house_share_id = t1.id
+        LEFT JOIN dic_agency t2 ON t.fk_agency_id = t2.id
+        LEFT JOIN dic_assets_co t3 ON t.fk_own_id = t3.id
+        LEFT JOIN land_assets t4 ON t.fk_land_assets_id = t4.id
+        LEFT JOIN dic_house_usage t5 ON t.fk_house_usage = t5.id
+        LEFT JOIN dic_house_nature t6 ON t.fk_house_nature = t6.id
+
+        WHERE 1 = 1
+        <if test="cd.ownerId != 0">
+            AND t.fk_own_id = #{cd.ownerId}
+        </if>
+        <if test="cd.agencyId != 0">
+            AND t.fk_agency_id = #{cd.agencyId}
+        </if>
+        <if test="cd.location != '' ">
+            AND t.location = #{cd.location}
+        </if>
+        <if test="asc == 0">
+            ORDER BY t.created_time DESC
+        </if>
+        <if test="asc == 1">
+            ORDER BY t.created_time ASC
+        </if>
+    </select>
+    <select id="getAllSerialId" resultType="java.lang.String">
+        SELECT
+            concat(t.house_id,'$',t.id)
+        FROM house_assets t
+    </select>
+</mapper>
+    

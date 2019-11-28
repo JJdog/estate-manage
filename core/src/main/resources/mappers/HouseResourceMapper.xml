@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanswon.estate.mapper.HouseResourceMapper">
+    <select id="getHouseResourcePageList" resultType="com.lanswon.estate.bean.vo.SimpleHouseResourceVO">
+        SELECT t.id,
+        t1.id AS assetsId,
+        t1.assets_name assetsName,
+        t2.name AS manageUnit,
+        CONCAT(t2.name,t.park,ifnull(t.build_no,'?'),'栋',ifnull(t.build_level,'?'),'层',ifnull(t.build_room,'')) AS
+        location,
+        t.resource_area,
+        t.origin_rent_charge,
+        t.guide_rent_charge,
+        t.real_rent_charge,
+        t.rent_status AS rentcode,
+        t.sell_status AS sellcode,
+        CASE t.rent_status WHEN 0 THEN '未出租' WHEN 1 THEN '已出租' END AS rentStatus,
+        CASE t.sell_status WHEN 0 THEN '未出售' WHEN 1 THEN '已出售' END AS sellStatus,
+        t.remark
+        FROM house_resource t
+        LEFT JOIN house_assets t1 ON t.fk_house_assets_id = t1.id
+        LEFT JOIN dic_agency t2 ON t1.fk_agency_id = t2.id
+        WHERE 1=1
+
+        <if test="cd.assetsId != 0">
+            AND t1.id = #{cd.assetsId}
+        </if>
+
+        <if test="cd.agencyId != 0">
+            AND t2.id = #{cd.agencyId}
+        </if>
+
+        <if test="cd.buildNo != ''">
+            AND t.build_no = #{cd.buildNo}
+        </if>
+
+        <if test="cd.buildLevel != 0">
+            AND t.build_level = #{cd.buildLevel}
+        </if>
+
+        <if test="cd.buildRoom != ''">
+            AND t.build_room = #{cd.buildRoom}
+        </if>
+
+        AND t.resource_area &gt;= #{cd.minArea}
+
+        <if test="cd.maxArea != 0">
+            AND t.resource_area &lt;= #{cd.maxArea}
+        </if>
+        <if test="cd.rentStatus != -1">
+            AND t.rent_status = #{cd.rentStatus}
+        </if>
+
+        <if test="cd.sellStatus != -1">
+            AND t.sell_status = #{cd.sellStatus}
+        </if>
+
+        <if test="asc == 0">
+            ORDER BY t.created_time DESC
+        </if>
+        <if test="asc == 1">
+            ORDER BY t.created_time ASC
+        </if>
+
+
+    </select>
+    <select id="getHouseResourceDetailInfo" resultType="com.lanswon.estate.bean.vo.DetailHouseResourceVO">
+        SELECT t.id,
+               t1.id                                                      AS assetsId,
+               t1.assets_name,
+               t3.name                                                    AS houseOwner,
+               t1.total_level,
+               t.fk_agency_id                                             AS agencyId,
+               t2.name                                                    AS agency,
+               t3.name                                                    AS landOwner,
+               t4.assets_location                                         AS landLocation,
+               t4.land_num,
+               t.park,
+               t.build_no,
+               t.build_level,
+               t.build_room,
+               t.resource_area,
+               t.origin_rent_charge,
+               t.guide_rent_charge,
+               t.real_rent_charge,
+               t.rent_status                                              AS rentCode,
+               CASE t.rent_status WHEN 0 THEN '未出租' WHEN 1 THEN '已出租' END AS rentStatus,
+               t.sell_status                                              AS sellCode,
+               CASE t.sell_status WHEN 0 THEN '未出售' WHEN 1 THEN '已出售' END AS sellStatus,
+               t.remark
+        FROM house_resource t
+                 LEFT JOIN house_assets t1 ON t.fk_house_assets_id = t1.id
+                 LEFT JOIN dic_agency t2 ON t.fk_agency_id = t2.id
+                 LEFT JOIN dic_assets_co t3 ON t3.id = t1.fk_own_id
+                 LEFT JOIN land_assets t4 ON t4.id = t1.fk_land_assets_id
+        WHERE t.id = #{hid}
+    </select>
+    <select id="getNoRentHouseResource" resultType="com.lanswon.estate.bean.vo.HouseResourceMenuVO">
+        SELECT t.id,
+               CONCAT(t1.name,t.park,ifnull(t.build_no,'?'),'栋',ifnull(t.build_level,'?'),'层',ifnull(t.build_room,'')) AS  resourseName
+        FROM house_resource t
+            LEFT JOIN dic_agency t1 ON t.fk_agency_id = t1.id
+        WHERE t.rent_status = 0 AND sell_status = 0
+    </select>
+
+</mapper>
+    
