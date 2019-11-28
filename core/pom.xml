@@ -128,7 +128,7 @@
                 </executions>
                 <configuration>
                     <!--这里指定打包镜像的名称${docker.registry}/${docker.image.prefix}/  -->
-                    <repository>jaswine.top:9950/springboot-demo</repository>
+                    <repository>jaswine.top:9950/estate</repository>
                     <!--每次推至私服都最新的额 不指定tag默认为latest-->
                     <tag>latest</tag>
                     <!-- 这里是复制 jar 包到 docker 容器指定目录配置 -->
