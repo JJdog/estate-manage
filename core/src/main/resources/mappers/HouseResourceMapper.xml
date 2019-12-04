@@ -1,25 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lanswon.estate.mapper.HouseResourceMapper">
-    <select id="getHouseResourcePageList" resultType="com.lanswon.estate.bean.vo.SimpleHouseResourceVO">
+
+    <select id="getHouseResourcePage" resultType="com.lanswon.estate.bean.vo.HouseResourcePageVO">
         SELECT t.id,
-        t1.id AS assetsId,
-        t1.assets_name assetsName,
-        t2.name AS manageUnit,
-        CONCAT(t2.name,t.park,ifnull(t.build_no,'?'),'栋',ifnull(t.build_level,'?'),'层',ifnull(t.build_room,'')) AS
+        t2.name AS agency,
+        CONCAT(t2.name,t.park,ifnull(t.build_no,'/'),'栋',ifnull(t.build_level,'/'),'层',ifnull(t.build_room,'')) AS
         location,
         t.resource_area,
         t.origin_rent_charge,
         t.guide_rent_charge,
         t.real_rent_charge,
+        format(t.real_rent_charge / t.resource_area,2) AS rentMoneyPerArea,
         t.rent_status AS rentcode,
         t.sell_status AS sellcode,
         CASE t.rent_status WHEN 0 THEN '未出租' WHEN 1 THEN '已出租' END AS rentStatus,
         CASE t.sell_status WHEN 0 THEN '未出售' WHEN 1 THEN '已出售' END AS sellStatus,
-        t.remark
+        t.remark,
+        t1.id AS assetsId,
+        t1.assets_name assetsName
         FROM house_resource t
         LEFT JOIN house_assets t1 ON t.fk_house_assets_id = t1.id
-        LEFT JOIN dic_agency t2 ON t1.fk_agency_id = t2.id
+        LEFT JOIN dic_agency t2 ON t.fk_agency_id = t2.id
         WHERE 1=1
 
         <if test="cd.assetsId != 0">
@@ -55,10 +57,10 @@
             AND t.sell_status = #{cd.sellStatus}
         </if>
 
-        <if test="asc == 0">
+        <if test="cd.asc == 0">
             ORDER BY t.created_time DESC
         </if>
-        <if test="asc == 1">
+        <if test="cd.asc == 1">
             ORDER BY t.created_time ASC
         </if>
 
@@ -100,7 +102,48 @@
                CONCAT(t1.name,t.park,ifnull(t.build_no,'?'),'栋',ifnull(t.build_level,'?'),'层',ifnull(t.build_room,'')) AS  resourseName
         FROM house_resource t
             LEFT JOIN dic_agency t1 ON t.fk_agency_id = t1.id
-        WHERE t.rent_status = 0 AND sell_status = 0
+        WHERE t.rent_status = 0
+          AND sell_status = 0
+
+    </select>
+
+    <select id="getHouseResourceDetailByDealId" resultType="com.lanswon.estate.bean.vo.DetailHouseResourceVO">
+        SELECT
+            t.id,
+            CONCAT(t2.name,t.park,ifnull(t.build_no,'/'),'栋',ifnull(t.build_level,'/'),'层',ifnull(t.build_room,'')) AS resourceName,
+            t2.id AS agencyId,
+            t2.name AS agency,
+            t.park,
+            t.build_no,
+            t.build_level,
+            t.build_room,
+            t.resource_area,
+            t.origin_rent_charge,
+            t.guide_rent_charge,
+            convert(t.guide_rent_charge / t.resource_area,decimal(10,2)) AS guideRentMoneyPerArea,
+            t.real_rent_charge,
+            t.rent_money_per_area AS rentMoneyPerArea,
+            t.rent_status AS rentCoede,
+            t.rent_status,
+            t.sell_status AS sellCode,
+            t.sell_status,
+            t6.name AS  houseUsage,
+            t.remark,
+            t3.id AS assetsId,
+            t3.assets_name,
+            t4.name AS houseOwner,
+            t3.total_level,
+            t3.location AS houseLocation,
+            t5.assets_location AS landLocation,
+            t5.land_num
+        FROM house_resource t
+        LEFT JOIN mid_deal_house t1 ON t1.fk_house_resource_id = t.id
+        LEFT JOIN dic_agency t2 ON t.fk_agency_id = t2.id
+        LEFT JOIN house_assets t3 ON t.fk_house_assets_id = t3.id
+        LEFT JOIN dic_assets_co t4 ON t3.fk_own_id = t4.id
+        LEFT JOIN land_assets t5 ON t3.fk_land_assets_id = t5.id
+        LEFT JOIN dic_house_usage t6 ON t6.id = t3.fk_house_usage
+        WHERE t1.fk_deal_id = #{id}
     </select>
 
 </mapper>

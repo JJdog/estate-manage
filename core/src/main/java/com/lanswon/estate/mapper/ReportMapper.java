@@ -5,6 +5,7 @@ import com.lanswon.estate.bean.cd.ReportCD;
 import com.lanswon.estate.bean.vo.MonthRentChargeVO;
 import com.lanswon.estate.bean.vo.report.ReportHouseAssetsVO;
 import com.lanswon.estate.bean.vo.report.ReportHouseResourceVO;
+import com.lanswon.estate.bean.vo.report.ReportHouseVO;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
@@ -21,6 +22,5 @@ public interface ReportMapper {
 
 	ReportHouseAssetsVO getHouseAssetsReport(@Param("id") Long id);
 
-	List<ReportHouseResourceVO> getHouseResourceReport(@Param("id") Long id,
-	                                             @Param("cd") ReportCD cd);
+	List<ReportHouseVO> getHouseResourceReport(@Param("cd") ReportCD cd);
 }

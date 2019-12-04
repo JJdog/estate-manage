@@ -7,11 +7,13 @@ import com.lanswon.commons.web.rtn.CustomRtnEnum;
 import com.lanswon.commons.web.rtn.DataRtnDTO;
 import com.lanswon.estate.bean.po.PoiHouseAssetsPO;
 import com.lanswon.estate.bean.po.PoiHouseResourcePO;
+import com.lanswon.estate.bean.po.PoiLandAssetsPO;
 import com.lanswon.estate.bean.po.PoiTransFlow;
 import com.lanswon.estate.bean.vo.PoiResultVO;
 import com.lanswon.estate.mapper.DicAgencyMapper;
 import com.lanswon.estate.mapper.DicAssetsCoMapper;
 import com.lanswon.estate.mapper.HouseAssetsMapper;
+import com.lanswon.estate.mapper.PoiLandAssetsMapper;
 import com.lanswon.estate.mapper.poi.PoiHouseAssetsMapper;
 import com.lanswon.estate.mapper.poi.PoiHouseResourceMapper;
 import com.lanswon.estate.mapper.poi.PoiTransFlowMapper;
@@ -45,6 +47,8 @@ public class IoService {
 	@Resource
 	private DicAssetsCoMapper dicAssetsCoMapper;
 	@Resource
+	private PoiLandAssetsMapper poiLandAssetsMapper;
+	@Resource
 	private PoiHouseResourceMapper poiHouseResourceMapper;
 	@Resource
 	private PoiHouseAssetsMapper poiHouseAssetsMapper;
@@ -64,6 +68,58 @@ public class IoService {
 		agencyNameAndId = agencyMapper.getAllNameAndId();
 		houseAssetsNameAndId = houseAssetsMapper.getAllSerialId();
 		ownerNameAndId = dicAssetsCoMapper.getAllNameAndId();
+	}
+
+
+	/** In 地产*/
+	public DTO importLandAssets(MultipartFile file) {
+		init();
+
+		/* 写入数据库对象 */
+		List<PoiLandAssetsPO> dbLandAssets = new ArrayList<>();
+
+		/* 汇总数据 */
+		PoiResultVO poiResultVO = new PoiResultVO();
+
+		try {
+			// 获得Excel数据
+			List<PoiLandAssetsPO> landAssetsPOS = FileIOUtil.importFile(file.getInputStream(), 0, 1, PoiLandAssetsPO.class);
+
+			poiResultVO.setTotalRow(landAssetsPOS.size());
+
+
+			// 转码后放到新容器
+			landAssetsPOS.forEach(poiLandAssetsPO -> {
+				dbLandAssets.add(convertLandAssets2Database(poiLandAssetsPO));
+			});
+
+			// 遍历容器插入
+			dbLandAssets.forEach(poiLandAssetsPO -> poiLandAssetsMapper.insert(poiLandAssetsPO));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(),CustomRtnEnum.SUCCESS.getMsg(),poiResultVO);
+	}
+
+	/** In房产 */
+	public DTO importHouseAssets(MultipartFile file) {
+		init();
+
+		List<PoiHouseAssetsPO> dbHouseAssets = new ArrayList<>();
+
+
+		try {
+			List<PoiHouseAssetsPO> poiHouseAssetsPOS = FileIOUtil.importFile(file.getInputStream(), 0, 1, PoiHouseAssetsPO.class);
+
+			poiHouseAssetsPOS.forEach(poiHouseAssetsPO -> dbHouseAssets.add(convertHouseAssets2Database(poiHouseAssetsPO)));
+
+			dbHouseAssets.forEach(poiHouseAssetsPO -> poiHouseAssetsMapper.insert(poiHouseAssetsPO));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+
 	}
 
 
@@ -101,25 +157,6 @@ public class IoService {
 	}
 
 
-	/** In房产 */
-	public DTO importHouseAssets(MultipartFile file) {
-		init();
-
-		List<PoiHouseAssetsPO> dbHouseAssets = new ArrayList<>();
-
-
-		try {
-			List<PoiHouseAssetsPO> poiHouseAssetsPOS = FileIOUtil.importFile(file.getInputStream(), 0, 1, PoiHouseAssetsPO.class);
-
-			poiHouseAssetsPOS.forEach(poiHouseAssetsPO -> dbHouseAssets.add(convertHouseAssets2Database(poiHouseAssetsPO)));
-
-			dbHouseAssets.forEach(poiHouseAssetsPO -> poiHouseAssetsMapper.insert(poiHouseAssetsPO));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-
-	}
 
 	/** In流水 */
 	public DTO importTransFlow(MultipartFile file) {
@@ -147,6 +184,14 @@ public class IoService {
 	}
 
 
+	/** 土产转码 */
+	private PoiLandAssetsPO convertLandAssets2Database(PoiLandAssetsPO poiLandAssetsPO){
+		// 产权人
+		poiLandAssetsPO.setFkOwnId(ownerName2Id(poiLandAssetsPO.getOwner()));
+		// 管理单位
+		poiLandAssetsPO.setFkAgencyId(agencyName2Id(poiLandAssetsPO.getAgencyName()));
+		return poiLandAssetsPO;
+	}
 
 	/**
 	 * 房源转码
@@ -178,7 +223,13 @@ public class IoService {
 	}
 
 
-	// 管理单位转码
+
+	/*============名称转id==========================*/
+
+
+
+
+	/** 管理单位转码 */
 	private Long agencyName2Id(String name){
 		for (String s : agencyNameAndId){
 			if (s.startsWith(name)){
@@ -189,7 +240,7 @@ public class IoService {
 		return null;
 	}
 
-	// 房产转码
+	/** 房产转码 */
 	private Long houseAssetsSerialName2Id(String name){
 		for (String s: houseAssetsNameAndId){
 			if (s.startsWith(name)){
@@ -199,7 +250,7 @@ public class IoService {
 		return null;
 	}
 
-	// 产权所有人转码
+	/** 产权所有人转码 */
 	private Long ownerName2Id(String name){
 		for (String s : ownerNameAndId){
 			if (s.startsWith(name)){
@@ -208,6 +259,7 @@ public class IoService {
 		}
 		return null;
 	}
+
 
 
 }

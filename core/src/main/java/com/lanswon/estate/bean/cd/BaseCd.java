@@ -14,4 +14,5 @@ public abstract class BaseCd {
 	public int page;
 	public int limit;
 	public int asc;
+	public long aid;
 }

@@ -15,9 +15,9 @@ import java.util.Date;
  */
 @Data
 @ApiModel(value = "房屋产权信息VO")
-public class HouseAssetsVO extends BasePojo {
+public class HouseAssetsPageVO {
 
-
+	private Long id;
 
 	@ApiModelProperty(value = "房产证号")
 	private String houseId;
@@ -70,15 +70,16 @@ public class HouseAssetsVO extends BasePojo {
 	@ApiModelProperty(value = "其他面积")
 	private double otherArea;
 
+	private double yzArea;
+
+	private double wzArea;
+
 	@ApiModelProperty(value = "土地资产id")
 	private long landAssetsId;
 
 	@ApiModelProperty(value = "地号")
 	private String landNum;
 
-	// todo
-	@ApiModelProperty(value = "土地获得方式")
-	private String landGetMethod;
 
 	// todo
 	@ApiModelProperty(value = "土地使用年限")

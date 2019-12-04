@@ -39,6 +39,61 @@
         WHERE DATE_ADD(now(), INTERVAL #{day} DAY) &gt;= t.rent_date
           AND t.is_enable = 1
     </select>
+    <select id="getRentChargeInfoByDatePage" resultType="com.lanswon.estate.bean.vo.MustMoneyPageVO">
+        SELECT * FROM (SELECT
+            group_concat(concat(t5.name, t4.park, t4.build_no, '号楼', t4.build_level, '层', t4.build_room) SEPARATOR
+                         ',') AS houseLocation,
+            t5.name AS agency,
+            t6.name AS renter,
+            t.id AS payId,
+            date(t1.start_time) AS date,
+            concat('合同保证金') AS reason,
+            t.deposit AS money
+        FROM money_deposit_must t
+            LEFT JOIN deal t1 ON t.fk_deal_id = t1.id
+            LEFT JOIN mid_deal_house t3 ON t3.fk_deal_id = t1.id
+            LEFT JOIN house_resource t4 ON t3.fk_house_resource_id = t4.id
+            LEFT JOIN dic_agency t5 ON t4.fk_agency_id = t5.id
+            LEFT JOIN renter t6 ON t1.fk_renter_id = t6.id
+        WHERE month(t1.start_time) = month(#{cd.date})
+
+        UNION ALL
+        SELECT
+            group_concat(concat(t5.name, t4.park, t4.build_no, '号楼', t4.build_level, '层', t4.build_room) SEPARATOR
+                         ',') AS houseLocation,
+            t5.name AS agency,
+            t6.name AS renter,
+            t.id AS payId,
+            date(t.rent_date) AS date,
+            concat(date(t.rent_date),'-后',t1.pay_type,'月租金') AS reason,
+            t.must_charge AS money
+        FROM money_rent_must t
+            LEFT JOIN deal t1 ON t.fk_deal_id = t1.id
+            LEFT JOIN mid_deal_house t3 ON t3.fk_deal_id = t1.id
+            LEFT JOIN house_resource t4 ON t3.fk_house_resource_id = t4.id
+            LEFT JOIN dic_agency t5 ON t4.fk_agency_id = t5.id
+            LEFT JOIN renter t6 ON t1.fk_renter_id = t6.id
+        WHERE month(t.rent_date) = month(#{cd.date})
+
+        UNION ALL
+            SELECT
+            group_concat(concat(t5.name, t4.park, t4.build_no, '号楼', t4.build_level, '层', t4.build_room) SEPARATOR
+                         ',') AS houseLocation,
+            t5.name AS agency,
+            t6.name AS renter,
+            t.id AS payId,
+            date(now()) AS date,
+            concat(year(now()),'-前往年欠款') AS reason,
+            t.arrears AS money
+        FROM money_arrears_must t
+            LEFT JOIN deal t1 ON t.fk_deal_id = t1.id
+            LEFT JOIN mid_deal_house t3 ON t3.fk_deal_id = t1.id
+            LEFT JOIN house_resource t4 ON t3.fk_house_resource_id = t4.id
+            LEFT JOIN dic_agency t5 ON t4.fk_agency_id = t5.id
+            LEFT JOIN renter t6 ON t1.fk_renter_id = t6.id
+        WHERE year(now()) = year(#{cd.date})) a
+        WHERE a.houseLocation IS NOT NULL
+    </select>
     <update id="freezeRentCharge">
         UPDATE money_rent_must t
         SET t.is_enable = 3

@@ -18,11 +18,11 @@ public class DetailHouseResourceVO implements Serializable {
 
 	/////房源信息////
 
-	/** 房源名称 */
-	private String resourceName;
+	///** 房源名称 */
+	//private String resourceName;
 
 	/** 管理单位id */
-	private String agencyId;
+	private long agencyId;
 
 	/** 管理单位 */
 	private String agency;
@@ -54,8 +54,14 @@ public class DetailHouseResourceVO implements Serializable {
 	/** 指导价 */
 	private double guideRentCharge;
 
+	/** 指导每平方米月租金 */
+	private double guideRentMoneyPerArea;
+
 	/** 实际租金 */
 	private double realRentCharge;
+
+	/** 每平方米月租金 */
+	private double rentMoneyPerArea;
 
 	/** 出租代码 */
 	private int rentCode;
@@ -89,8 +95,8 @@ public class DetailHouseResourceVO implements Serializable {
 	/** 房产坐落 */
 	private String houseLocation;
 
-	/** 管理单位 */
-	private String manageUnit;
+	/** 房产用途 */
+	private String houseUsage;
 
 	////土地信息///
 

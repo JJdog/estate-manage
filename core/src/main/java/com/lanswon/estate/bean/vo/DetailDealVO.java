@@ -15,6 +15,7 @@ import java.util.List;
 public class DetailDealVO {
 
 
+	private Long id;
 	/** 合同编号 */
 	private String dealSerial;
 

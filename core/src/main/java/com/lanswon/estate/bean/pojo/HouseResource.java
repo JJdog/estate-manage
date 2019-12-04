@@ -3,6 +3,7 @@ package com.lanswon.estate.bean.pojo;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.lanswon.commons.web.pojo.BasePojo;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,13 +23,9 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName(value = "house_resource")
+@ApiModel(value = "房源POJO")
 public class HouseResource extends BasePojo {
 
-
-  @NotBlank(message = "房源名称不可为空")
-  @NotNull(message = "房源名称不可为空")
-  @ApiModelProperty(value = "房源名称")
-  private String resourceName;
 
   @NotNull(message = "房源必须绑定房产信息")
   @ApiModelProperty(value = "房产id")
@@ -61,8 +58,12 @@ public class HouseResource extends BasePojo {
   @ApiModelProperty(value = "指导价")
   private double guideRentCharge;
 
+  @NotNull(message = "实际租金不可为空")
   @ApiModelProperty(value = "实际租金")
   private double realRentCharge;
+
+  @ApiModelProperty(value = "每平方米月租金",hidden = true)
+  private double rentMoneyPerArea;
 
   @ApiModelProperty(value = "出租状态")
   private int rentStatus;

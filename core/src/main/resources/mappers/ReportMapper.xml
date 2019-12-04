@@ -24,14 +24,16 @@
         LEFT JOIN dic_agency t1 ON t.fk_agency_id = t1.id
         WHERE t.fk_agency_id = #{id}
     </select>
-    <select id="getHouseResourceReport" resultType="com.lanswon.estate.bean.vo.report.ReportHouseResourceVO">
-        SELECT date_format(t1.start_time,'%Y-%m') AS month, count(t1.id) AS totalRentedResourceNum, sum(t.resource_area) AS totalRentedResourceArea
+    <select id="getHouseResourceReport" resultType="com.lanswon.estate.bean.vo.report.ReportHouseVO">
+    SELECT
+        t3.name AS agency,
+        sum(if(t2.is_new_rent = 1,t.resource_area,0)) AS newRentArea,
+        sum(if(t2.is_new_rent = 2,t.resource_area,0)) AS oldRentArea,
+        sum(t.resource_area) AS totalMonthRentArea
         FROM house_resource t
-                 LEFT JOIN deal t1
-                           ON t1.fk_house_resource_id = t.id
-        WHERE date(t1.start_time )BETWEEN date(#{cd.startDate} ) AND date(#{cd.endStart})
-          AND t.fk_agency_id = #{id}
-        GROUP BY date_format(t1.start_time,'%Y-%m');
+            LEFT JOIN mid_deal_house t1 ON t1.fk_house_resource_id = t.id
+            LEFT JOIN deal t2 ON t1.fk_deal_id = t2.id
+            LEFT JOIN dic_agency t3 ON t.fk_agency_id = t3.id
     </select>
 </mapper>
     

@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lanswon.estate.mapper.HouseAssetsMapper">
-    <select id="getHouseAssetsListPage" resultType="com.lanswon.estate.bean.vo.HouseAssetsVO">
+    <select id="getHouseAssetsPage" resultType="com.lanswon.estate.bean.vo.HouseAssetsPageVO">
         SELECT t.id,
-        t.created_time,
-        t.updated_time,
-        t.created_by,
-        t.updated_by,
         t.house_id,
         t.location,
         t.assets_name,
@@ -24,6 +20,8 @@
         t.build_area,
         t.real_area,
         t.other_area,
+        t.yz_area AS yzArea,
+        t.wz_area AS wzArea,
         t.fk_land_assets_id AS landAssetsId,
         t4.land_num,
         t.register_time,
@@ -46,10 +44,10 @@
         <if test="cd.location != '' ">
             AND t.location = #{cd.location}
         </if>
-        <if test="asc == 0">
+        <if test="cd.asc == 0">
             ORDER BY t.created_time DESC
         </if>
-        <if test="asc == 1">
+        <if test="cd.asc == 1">
             ORDER BY t.created_time ASC
         </if>
     </select>

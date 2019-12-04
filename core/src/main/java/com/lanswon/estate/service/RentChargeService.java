@@ -1,19 +1,23 @@
 package com.lanswon.estate.service;
 
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lanswon.commons.core.time.DateTimeUtil;
 import com.lanswon.commons.web.dto.DTO;
 import com.lanswon.commons.web.rtn.CustomRtnEnum;
 import com.lanswon.commons.web.rtn.DataRtnDTO;
 import com.lanswon.commons.web.rtn.SimpleRtnDTO;
+import com.lanswon.estate.bean.cd.RentCD;
+import com.lanswon.estate.bean.po.PoiTransFlow;
 import com.lanswon.estate.bean.pojo.Deal;
+import com.lanswon.estate.bean.pojo.MoneyRealFlow;
 import com.lanswon.estate.bean.pojo.RentCharge;
-import com.lanswon.estate.bean.vo.DetailDealVO;
-import com.lanswon.estate.bean.vo.DetailRentChargeVO;
-import com.lanswon.estate.bean.vo.MonthRentChargeVO;
+import com.lanswon.estate.bean.vo.*;
 import com.lanswon.estate.bean.vo.report.RentChargeHasDateAndLastNoDateVO;
 import com.lanswon.estate.mapper.DealMapper;
 import com.lanswon.estate.mapper.HouseResourceMapper;
+import com.lanswon.estate.mapper.MoneyRealFlowMapper;
 import com.lanswon.estate.mapper.RentChargeMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,6 +43,8 @@ public class RentChargeService {
 	private DealMapper dealMapper;
 	@Resource
 	private RentChargeMapper rentChargeMapper;
+	@Resource
+	private MoneyRealFlowMapper moneyRealFlowMapper;
 	@Resource
 	private HouseResourceMapper houseResourceMapper;
 
@@ -73,8 +79,20 @@ public class RentChargeService {
 		detailRentChargeVO.setMonthRentCharge(monthRentChargeList);
 
 		log.info(CustomRtnEnum.SUCCESS.toString());
-
 		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(), CustomRtnEnum.SUCCESS.getMsg(), detailRentChargeVO);
+	}
+
+	public DTO getDetailRentChargeInfoByDate(RentCD cd) {
+		log.info("获得-->{}的应收租金情况",cd.getDate());
+
+		IPage<MustMoneyPageVO> rentChargeInfoByDate = rentChargeMapper.getRentChargeInfoByDatePage(new Page<>(cd.getPage(),cd.getLimit()),cd);
+
+		if (rentChargeInfoByDate.getRecords().isEmpty()){
+			log.error("应收信息为空");
+			return new DataRtnDTO<>(CustomRtnEnum.ERROR_EMPTY_RESULT.getStatus(),CustomRtnEnum.ERROR_EMPTY_RESULT.getMsg(),rentChargeInfoByDate);
+		}
+		log.info(CustomRtnEnum.SUCCESS.toString());
+		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(),CustomRtnEnum.SUCCESS.getMsg(),rentChargeInfoByDate);
 	}
 
 
@@ -129,12 +147,8 @@ public class RentChargeService {
 			rentCharge.setFkDealId(deal.getId());
 			// 收租时间(精确到 年/月/日)
 			rentCharge.setRentDate(mustRentCalendar.getTime());
-			// 收租年份
-			rentCharge.setRentYear(mustRentCalendar.get(Calendar.YEAR));
-			// 收租月份
-			rentCharge.setRentMonth(mustRentCalendar.get(Calendar.MONTH) + 1);
 			// 未启用(审核后启用)
-			rentCharge.setRentStatus(2);
+			rentCharge.setIsEnable(2);
 
 			/* 判断是否是月的第一天
 			 * Y:无头无尾，正常交钱
@@ -202,10 +216,8 @@ public class RentChargeService {
 		RentCharge rentCharge = new RentCharge();
 		rentCharge.setFkDealId(id);
 		rentCharge.setRentDate(date);
-		rentCharge.setRentYear(DateTimeUtil.getYearOfDate(date));
-		rentCharge.setRentMonth(DateTimeUtil.getMonthByDate(date));
 		// 这个租金默认启用
-		rentCharge.setRentStatus(1);
+		rentCharge.setIsEnable(1);
 		rentCharge.setMustCharge(tail);
 		// 插入尾款
 		if (rentChargeMapper.insert(rentCharge) == 0){
@@ -216,10 +228,10 @@ public class RentChargeService {
 		log.info("计算合同尾款成功");
 	}
 
-	public DTO pay4Rent(long id, double money) {
-		log.info("租金节点{}收租{}",id,money);
-
-		if (!rentChargeMapper.pay4Rent(id,money)){
+	public DTO pay4Rent(MoneyRealFlow moneyRealFlow) {
+		log.info("收取{}",moneyRealFlow.getMoney());
+		moneyRealFlow.setCreatedTime(new Date());
+		if (moneyRealFlowMapper.insert(moneyRealFlow) == 0){
 			log.error("交租金失败");
 			return new SimpleRtnDTO(CustomRtnEnum.ERROR_BAD_SQL.getStatus(),CustomRtnEnum.ERROR_BAD_SQL.getMsg());
 		}
@@ -227,4 +239,6 @@ public class RentChargeService {
 		log.info(CustomRtnEnum.SUCCESS.toString());
 		return new SimpleRtnDTO(CustomRtnEnum.SUCCESS.getStatus(),CustomRtnEnum.SUCCESS.getMsg());
 	}
+
+
 }

@@ -1,0 +1,50 @@
+package com.lanswon.estate.service;
+
+import com.lanswon.commons.web.dto.DTO;
+import com.lanswon.commons.web.rtn.CustomRtnEnum;
+import com.lanswon.commons.web.rtn.DataRtnDTO;
+import com.lanswon.commons.web.rtn.SimpleRtnDTO;
+import com.lanswon.estate.bean.dto.SimpleUserDTO;
+import com.lanswon.estate.bean.pojo.MidUserInfo;
+import com.lanswon.estate.mapper.UserMapper;
+import com.lanswon.estate.provider.UumProvider;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.Date;
+
+@Service
+@Slf4j
+public class UserService {
+
+	@Resource
+	private UumProvider uumProvider;
+	
+	@Resource
+	private UserMapper userMapper;
+
+
+	public DTO bindDepartment(Long uid, Long did) {
+		log.info("绑定用户和部门");
+		MidUserInfo userInfo = new MidUserInfo(uid, did);
+		userInfo.setCreatedTime(new Date());
+		if (userMapper.insert(userInfo) == 0){
+			log.error(CustomRtnEnum.ERROR_BAD_SQL.toString());
+			return new SimpleRtnDTO(CustomRtnEnum.ERROR_BAD_SQL.getStatus(),CustomRtnEnum.ERROR_BAD_SQL.getMsg());
+		}
+
+		log.info(CustomRtnEnum.SUCCESS.toString());
+		return new SimpleRtnDTO(CustomRtnEnum.SUCCESS.getStatus(), CustomRtnEnum.SUCCESS.getMsg());
+	}
+
+	public DTO getUserInfoByUid(Long uid) {
+		SimpleUserDTO userDTO = uumProvider.getSimpleUserInfoByUid(uid).getData();
+		userDTO.setAgency(userMapper.getAgencyByUid(uid).getAgency());
+		userDTO.setAgencyId(userMapper.getAgencyByUid(uid).getAgencyId());
+
+		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(),CustomRtnEnum.SUCCESS.getMsg(),userDTO);
+
+	}
+}
+

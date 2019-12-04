@@ -7,7 +7,7 @@ import com.lanswon.estate.bean.cd.HouseResourceCD;
 import com.lanswon.estate.bean.pojo.HouseResource;
 import com.lanswon.estate.bean.vo.DetailHouseResourceVO;
 import com.lanswon.estate.bean.vo.HouseResourceMenuVO;
-import com.lanswon.estate.bean.vo.SimpleHouseResourceVO;
+import com.lanswon.estate.bean.vo.HouseResourcePageVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -25,9 +25,8 @@ import java.util.List;
 public interface HouseResourceMapper extends BaseMapper<HouseResource> {
 
 
-	IPage<SimpleHouseResourceVO> getHouseResourcePageList(@Param(value = "page") Page<Object> objectPage,
-	                                                      @Param(value = "asc") int asc,
-	                                                      @Param(value = "cd") HouseResourceCD cd);
+	IPage<HouseResourcePageVO> getHouseResourcePage(@Param(value = "page") Page<Object> objectPage,
+	                                                @Param(value = "cd") HouseResourceCD cd);
 
 	DetailHouseResourceVO getHouseResourceDetailInfo(long hid);
 
@@ -53,4 +52,6 @@ public interface HouseResourceMapper extends BaseMapper<HouseResource> {
 
 	@Select("SELECT sum(resource_wz_area) FROM house_resource WHERE fk_agency_id = #{id} ")
 	double getTotalResourceWzAreaByAgencyId(Long id);
+
+	List<DetailHouseResourceVO> getHouseResourceDetailByDealId(long id);
 }

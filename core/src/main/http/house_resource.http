@@ -1,0 +1,42 @@
+###
+
+#### 新增
+POST http://127.0.0.1:14000/estate/hresource
+Content-Type: application/json
+
+{
+  "buildLevel": 10,
+  "buildNo": "A5",
+  "buildRoom": "1008",
+  "fkAgencyId": 7885729059424395264,
+  "fkHouseAssetsId": 7885752748551397376,
+  "guideRentCharge": 5456,
+  "originRentCharge": 5000,
+  "park": "睦邻中心",
+  "realRentCharge": 5500,
+  "remark": "测试003",
+  "rentStatus": 0,
+  "resourceArea": 100,
+  "sellStatus": 0,
+  "createdBy":68190731070931
+}
+
+### 查询
+POST http://127.0.0.1:14000/estate/hresource/all
+Content-Type: application/json
+
+{
+  "agencyId": 0,
+  "assetsId": 0,
+  "buildLevel": 0,
+  "buildNo": "",
+  "buildRoom": "",
+  "limit": 100,
+  "maxArea": 0,
+  "minArea": 0,
+  "page": 1,
+  "rentStatus": 0,
+  "sellStatus": 0
+}
+
+###

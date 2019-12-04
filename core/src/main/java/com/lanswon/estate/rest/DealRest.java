@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.validation.Valid;
 import java.util.Date;
 
 /**
@@ -27,7 +28,7 @@ public class DealRest {
 
 	@PostMapping
 	@ApiOperation(value = "新增合同")
-	public DTO insertDeal(@RequestBody Deal deal){
+	public DTO insertDeal(@RequestBody @Valid Deal deal){
 		return dealService.insertDeal(deal);
 	}
 

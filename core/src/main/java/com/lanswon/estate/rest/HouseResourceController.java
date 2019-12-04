@@ -48,9 +48,8 @@ public class HouseResourceController {
 
 	@PostMapping("/all")
 	@ApiOperation(value = "获得所有房源信息-分页")
-	public DTO getAllHouseResource(@RequestParam(value = "asc") int asc,
-	                               @RequestBody HouseResourceCD cd){
-		return houseResourceService.getAllHouseResource(asc,cd);
+	public DTO getHouseResourcePage(@RequestBody HouseResourceCD cd){
+		return houseResourceService.getHouseResourcePage(cd);
 	}
 
 	@GetMapping("/{hid}")

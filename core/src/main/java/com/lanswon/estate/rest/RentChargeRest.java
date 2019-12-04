@@ -2,6 +2,8 @@ package com.lanswon.estate.rest;
 
 
 import com.lanswon.commons.web.dto.DTO;
+import com.lanswon.estate.bean.cd.RentCD;
+import com.lanswon.estate.bean.pojo.MoneyRealFlow;
 import com.lanswon.estate.service.RentChargeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -11,7 +13,7 @@ import javax.annotation.Resource;
 
 @RestController
 @RequestMapping(value = "/rent")
-@Api(value = "租金",tags = "租金")
+@Api(value = "资金",tags = "资金")
 public class RentChargeRest {
 
 	@Resource
@@ -20,15 +22,21 @@ public class RentChargeRest {
 	@GetMapping("/detail/{id}")
 	@ApiOperation(value = "依据合同查看租金信息")
 	public DTO getDetailRentChargeInfo(@PathVariable(value = "id") long id){
-
 		return rentChargeService.getDetailRentChargeInfo(id);
 	}
 
-	@PutMapping("/pay/{id}/{money}")
+	@PostMapping(value = "/date")
+	@ApiOperation(value = "依据时间查看要收的款项")
+	public DTO getDetailRentChargeInfo(@RequestBody RentCD cd){
+		return rentChargeService.getDetailRentChargeInfoByDate(cd);
+	}
+
+
+
+	@PutMapping("/pay")
 	@ApiOperation(value = "缴费")
-	public DTO pay4Rent(@PathVariable(value = "id")long id,
-	                    @PathVariable(value = "money")double money){
-		return rentChargeService.pay4Rent(id,money);
+	public DTO pay4Rent(@RequestBody MoneyRealFlow moneyRealFlow){
+		return rentChargeService.pay4Rent(moneyRealFlow);
 	}
 
 }

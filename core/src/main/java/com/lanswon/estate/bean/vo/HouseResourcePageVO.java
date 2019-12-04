@@ -1,10 +1,8 @@
 package com.lanswon.estate.bean.vo;
 
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
 
 /**
  * 房源简单信息VO
@@ -12,20 +10,14 @@ import javax.validation.constraints.NotNull;
  * @author jaswine
  */
 @Data
-public class SimpleHouseResourceVO {
+public class HouseResourcePageVO {
+
+	/*==============房源===================*/
 
 	private long id;
 
-	private String resourceName;
-
-	/** 产证id */
-	private long assetsId;
-
-	/** 产权名称 */
-	private String assetsName;
-
 	/** 管理单位 */
-	private String manageUnit;
+	private String agency;
 
 	/** 地址 */
 	private String location;
@@ -33,15 +25,17 @@ public class SimpleHouseResourceVO {
 	/** 房源面积 */
 	private double resourceArea;
 
-	@ApiModelProperty(value = "原来租金")
+	/** 原来租金 */
 	private double originRentCharge;
 
-	@NotNull(message = "房源指导价不可为空")
-	@ApiModelProperty(value = "指导价")
+	/** 指导价 */
 	private double guideRentCharge;
 
-	@ApiModelProperty(value = "实际租金")
+	/** 实际租金 */
 	private double realRentCharge;
+
+	/** 每平米月单价 */
+	private double rentMoneyPerArea;
 
 	private int rentCode;
 	/** 出租状态 */
@@ -54,5 +48,12 @@ public class SimpleHouseResourceVO {
 	/** 备注 */
 	private String remark;
 
+
+	/*==============房产===================*/
+	/** 产证id */
+	private long assetsId;
+
+	/** 房产名称 */
+	private String assetsName;
 
 }

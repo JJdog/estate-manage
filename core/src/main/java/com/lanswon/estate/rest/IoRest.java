@@ -30,6 +30,10 @@ public class IoRest {
 	private IoService ioService;
 
 
+	@PostMapping(value = "land/in")
+	public DTO importLandAssets(@RequestParam(value = "file")MultipartFile file){
+		return ioService.importLandAssets(file);
+	}
 
 	@PostMapping(value = "houseassets")
 	public DTO importHouseAssets(@RequestParam(value = "file")MultipartFile file){

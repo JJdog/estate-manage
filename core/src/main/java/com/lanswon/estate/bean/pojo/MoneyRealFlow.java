@@ -29,13 +29,13 @@ public class MoneyRealFlow extends BasePojo {
 	@ApiModelProperty(value = "对应应收id")
     private long fkMustMoneyId;
 
-	@ApiModelProperty(value = "应收代码")
-    private String mustMoneyNum;
-
 	@ApiModelProperty(value = "实收日期")
     private Date moneyDate;
 
 	@ApiModelProperty(value = "实收金额")
     private double money;
+
+	@ApiModelProperty(value = "备注")
+	private String remark;
 
 }

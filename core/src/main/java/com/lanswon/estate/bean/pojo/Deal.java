@@ -55,6 +55,7 @@ public class Deal extends BasePojo {
 
 	@NotNull(message = "保证金不可为空")
 	@ApiModelProperty(value = "保证金",required = true)
+	@TableField(exist = false)
 	private double deposit;
 
 	@NotNull(message = "合同开始时间不可为空")

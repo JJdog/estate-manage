@@ -1,0 +1,38 @@
+### 房产
+POST http://127.0.0.1:14000/estate/assets/house
+Content-Type: application/json
+
+{
+  "assetsName": "房产名称001",
+  "buildArea": 10,
+  "fkHouseNature": 0,
+  "fkHouseShareId": 0,
+  "fkHouseUsage": 0,
+  "fkLandAssetsId": 0,
+  "fkOwnId": 7886033767811211264,
+  "houseId": "320826001",
+  "location": "建筑西路787号",
+  "otherArea": 10,
+  "realArea": 20,
+  "yzArea": 120,
+  "wzArea": 300,
+  "registerTime": "2019-11-29T02:07:52.502Z",
+  "remark": "string",
+  "totalLevel": 0,
+  "createdBy": 0
+}
+
+### 查询
+POST http://127.0.0.1:14000/estate/assets/house/all
+Content-Type: application/json
+
+{
+  "agencyId": 0,
+  "asc": 0,
+  "limit": 10,
+  "location": "",
+  "ownerId": 0,
+  "page": 1
+}
+
+###

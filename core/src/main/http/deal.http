@@ -1,0 +1,54 @@
+
+
+# 新增
+POST http://127.0.0.1:14000/estate/deal
+Content-Type: application/json
+
+{
+  "createdBy": 0,
+  "dealType": 1,
+  "deposit": 1000,
+  "fkHouseResourceId": [
+    7889666806669287424,
+    7889667042477252608
+  ],
+  "fkRenterId": 7885094205832601600,
+  "freeRentMonth": 0,
+  "isNewRent": 1,
+  "payType": 3,
+  "rentMonth": 12,
+  "startTime": "2019-11-29T01:12:19.767Z"
+}
+
+### 获得合同信息
+POST http://127.0.0.1:14000/estate/deal/all
+Content-Type: application/json
+
+{
+  "agencyId": 0,
+  "asc": 0,
+  "dealExistStatusCode": 0,
+  "dealName": "",
+  "dealReviewStatusCode": 0,
+  "dealTypeCode": 0,
+  "endTime": "",
+  "houseUsageId": 0,
+  "lessorId": 0,
+  "limit": 10,
+  "maxGuideRentCharge": 0,
+  "maxOriginRentCharge": 0,
+  "maxRealRentCharge": 0,
+  "maxRentMonth": 0,
+  "maxResourceArea": 0,
+  "minGuideRentCharge": 0,
+  "minOriginRentCharge": 0,
+  "minRealRentCharge": 0,
+  "minRentMonth": 0,
+  "minResourceArea": 0,
+  "page": 1,
+  "payTypeCode": 0,
+  "renterId": 0,
+  "startTime": ""
+}
+
+###

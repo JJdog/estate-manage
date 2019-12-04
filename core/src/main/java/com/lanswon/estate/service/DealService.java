@@ -15,14 +15,15 @@ import com.lanswon.estate.bean.pojo.DealAndHouse;
 import com.lanswon.estate.bean.pojo.MoneyDepositMust;
 import com.lanswon.estate.bean.vo.DealStatusVO;
 import com.lanswon.estate.bean.vo.DetailDealVO;
-import com.lanswon.estate.bean.vo.SimpleDealVO;
+import com.lanswon.estate.bean.vo.DealPage;
+import com.lanswon.estate.bean.vo.DetailHouseResourceVO;
 import com.lanswon.estate.mapper.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Date;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -86,8 +87,12 @@ public class DealService {
 				.withPrefix(dealType + "-")
 				.withSuffix("-" + String.format("%03d", serialNo.incrementAndGet()))
 				.generateSerial());
+		deal.setCreatedTime(new Date());
 		// todo 多算了一天
-		deal.setEndTime(DateTimeUtil.addMonth(deal.getStartTime(), deal.getRentMonth()).getTime());
+		GregorianCalendar a = new GregorianCalendar();
+		a.setTime(DateTimeUtil.addMonth(deal.getStartTime(), deal.getRentMonth()).getTime());
+		a.add(Calendar.DAY_OF_YEAR,-1);
+		deal.setEndTime(a.getTime());
 		// 合同正常存在
 		deal.setDealExistStatus(1);
 		// 合同未审核
@@ -97,12 +102,15 @@ public class DealService {
 
 
 		// 1.插入合同
+		log.info("插入合同");
 		if (dealMapper.insert(deal) == 0) {
 			log.error(CustomRtnEnum.ERROR_BAD_SQL.toString());
 			return new SimpleRtnDTO(CustomRtnEnum.ERROR_BAD_SQL.getStatus(), CustomRtnEnum.ERROR_BAD_SQL.getMsg());
 		}
 
+
 		// 2.插入合同和房源关系
+		log.info("绑定房源和合同");
 		deal.getFkHouseResourceId().forEach(aLong -> {
 			log.info("绑定合同-->{}和房源:{}的关系",deal.getId(),aLong);
 			DealAndHouse dealAndHouse = new DealAndHouse();
@@ -115,6 +123,7 @@ public class DealService {
 		});
 
 		// 3.修改房源状态
+		log.info("修改房源状态为已租赁");
 		deal.getFkHouseResourceId().forEach(aLong -> {
 			log.info("修改房源：{}的状态为已出租",aLong);
 			if (!houseResourceMapper.updateResource2HasRented(aLong)) {
@@ -125,17 +134,23 @@ public class DealService {
 
 		// todo basepojo 没有初始化
 		// 4.1.插入应收保证金
-		moneyDepositMustMapper.insert(new MoneyDepositMust()
+		log.info("插入应收保证金");
+		int deposit = moneyDepositMustMapper.insert(new MoneyDepositMust()
 				.toBuilder()
 				.fkDealId(deal.getId())
 				.deposit(deal.getDeposit())
 				.build());
+		if (deposit == 0){
+			log.error("插入应收保证金失败");
+			throw new RuntimeException("插入应收保证金失败");
+		}
 
 		// 4.合同的租金明细
+		log.info("插入应收租金明细");
 		rentChargeService.computeRent(deal).forEach(rentCharge -> {
-			log.info("插入租金信息,合同编号{},{}年{}月", rentCharge.getFkDealId(), rentCharge.getRentYear(), rentCharge.getRentMonth());
+			log.info("插入租金信息,合同编号{},年月{}", rentCharge.getFkDealId(), rentCharge.getRentDate());
 			if (rentChargeMapper.insert(rentCharge) == 0) {
-				log.error("租金插入异常--->{}年{}月", rentCharge.getRentYear(), rentCharge.getRentMonth());
+				log.error("租金插入异常--->租金年月{}", rentCharge.getRentDate());
 				throw new RuntimeException("租金生成异常");
 			}
 		});
@@ -211,9 +226,9 @@ public class DealService {
 
 		// 3.重新计算租金插入
 		rentChargeService.computeRent(deal).forEach(rentCharge -> {
-			log.info("插入租金信息,合同编号{},{}年{}月", rentCharge.getFkDealId(), rentCharge.getRentYear(), rentCharge.getRentMonth());
+			log.info("插入租金信息,合同编号{},年月{}", rentCharge.getFkDealId(), rentCharge.getRentDate());
 			if (rentChargeMapper.insert(rentCharge) == 0) {
-				log.error("租金插入异常--->{}年{}月", rentCharge.getRentYear(), rentCharge.getRentMonth());
+				log.error("租金插入异常--->年月{}", rentCharge.getRentDate());
 				throw new RuntimeException("租金生成异常");
 			}
 		});
@@ -227,13 +242,26 @@ public class DealService {
 
 		log.info("获得合同信息---分页");
 
-		IPage<SimpleDealVO> dealInfoList = dealMapper.getSimpleDealInfo(new Page<>(cd.getPage(), cd.getLimit()), cd);
+		IPage<DealPage> dealInfoList = dealMapper.getDealInfoPage(new Page<>(cd.getPage(), cd.getLimit()), cd);
 
 
 		if (dealInfoList.getRecords().isEmpty()) {
 			log.error(CustomRtnEnum.RESOURCE_NON_EXIST.toString());
 			return new DataRtnDTO<>(CustomRtnEnum.RESOURCE_NON_EXIST.getStatus(), CustomRtnEnum.RESOURCE_NON_EXIST.getMsg(),dealInfoList);
 		}
+
+		dealInfoList.getRecords().forEach(dealPage -> {
+			// 房源信息
+			log.info("获得合同-->{}的房源信息",dealPage.getId());
+			dealPage.setHouseResourceDetail(houseResourceMapper.getHouseResourceDetailByDealId(dealPage.getId()));
+			// 应收信息
+			log.info("获得合同-->{}的应收款信息",dealPage.getId());
+			dealPage.setMustMoney(dealMapper.getMustMoneyByDealId(dealPage.getId()));
+			// 实收信息
+			log.info("获得合同-->{}的实收款信息",dealPage.getId());
+			dealPage.setTransFlows(dealMapper.getTransFlowByDealId(dealPage.getId()));
+		});
+
 
 		log.info(CustomRtnEnum.SUCCESS.toString());
 
@@ -242,12 +270,17 @@ public class DealService {
 
 	public DTO getDetailDealInfo(long id) {
 		log.info("获得id为：{}的合同信息", id);
+
+		// 获得合同信息
 		DetailDealVO dealVO = dealMapper.getDetailDealInfo(id);
 
 		if (dealVO == null) {
 			log.error(CustomRtnEnum.RESOURCE_NON_EXIST.toString());
 			return new SimpleRtnDTO(CustomRtnEnum.RESOURCE_NON_EXIST.getStatus(), CustomRtnEnum.RESOURCE_NON_EXIST.getMsg());
 		}
+
+		// 获得对应房源信息
+		houseResourceMapper.getHouseResourceDetailByDealId(id);
 		log.info(CustomRtnEnum.SUCCESS.toString());
 		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(), CustomRtnEnum.SUCCESS.getMsg(), dealVO);
 	}
@@ -325,7 +358,7 @@ public class DealService {
 	public DTO getNoReviewDealInfoPage(DealCD cd) {
 		log.info("获得未审核合同信息---分页");
 
-		IPage<SimpleDealVO> dealInfoList = dealMapper.getNoReviewDealInfoPage(new Page<>(cd.getPage(), cd.getLimit()), cd);
+		IPage<DealPage> dealInfoList = dealMapper.getNoReviewDealInfoPage(new Page<>(cd.getPage(), cd.getLimit()), cd);
 
 
 		if (dealInfoList.getSize() == 0) {

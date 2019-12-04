@@ -32,10 +32,10 @@ public abstract class BasePojo implements Serializable {
 	@ApiModelProperty(value = "id",required = true,hidden = true)
 	private long id = SnowFlake.nextId();
 	/** 创建人 */
-	@ApiModelProperty(value = "创建人",required = true)
+	@ApiModelProperty(value = "创建人",hidden = true)
 	private Long createdBy = null;
 	/** 更新人 */
-	@ApiModelProperty(value = "创建人",required = true)
+	@ApiModelProperty(value = "创建人",hidden = true)
 	private Long updatedBy = null;
 	/** 创建时间 */
 	@ApiModelProperty(value = "创建时间",hidden = true)

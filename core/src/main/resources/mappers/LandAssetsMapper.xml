@@ -17,9 +17,9 @@
         t.use_right AS useRightCode,
         t3.name AS useRight,
         t.end_time,
-        t.assets_queue,
-        t.self_queue,
-        t.share_queue,
+        t.assets_area,
+        t.self_area,
+        t.share_area,
         t.remark
         FROM land_assets t
         LEFT JOIN dic_assets_co t1 ON t.fk_own_id = t1.id

@@ -3,8 +3,12 @@ package com.lanswon.estate.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lanswon.estate.bean.cd.RentCD;
+import com.lanswon.estate.bean.po.PoiTransFlow;
 import com.lanswon.estate.bean.pojo.RentCharge;
 import com.lanswon.estate.bean.vo.MonthRentChargeVO;
+import com.lanswon.estate.bean.vo.MustMoneyPageVO;
+import com.lanswon.estate.bean.vo.MustMoneyVO;
 import com.lanswon.estate.bean.vo.SimpleWarnRentVO;
 import com.lanswon.estate.bean.vo.report.RentChargeHasDateAndLastNoDateVO;
 import org.apache.ibatis.annotations.*;
@@ -70,4 +74,8 @@ public interface RentChargeMapper extends BaseMapper<RentCharge> {
 
 	@Select("SELECT t.rent_date FROM money_rent_must t WHERE t.is_enable = 3 ORDER BY t.rent_date ASC ")
 	Date getNextRentDate(long id);
+
+	IPage<MustMoneyPageVO> getRentChargeInfoByDatePage(@Param("page") Page page,
+	                                                   @Param("cd") RentCD cd);
+
 }

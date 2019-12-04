@@ -10,6 +10,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 /**
  * 房屋资产REST
@@ -27,7 +29,7 @@ public class HouseAssetsController {
 
 	@PostMapping
 	@ApiOperation(value = "新增房屋资产")
-	public DTO insertHouseAssets(@RequestBody HouseAssets houseAssets){
+	public DTO insertHouseAssets(@RequestBody @Valid HouseAssets houseAssets){
 		return houseAssetsService.insertHouseAssets(houseAssets);
 	}
 
@@ -45,9 +47,8 @@ public class HouseAssetsController {
 
 	@PostMapping(value = "/all")
 	@ApiOperation(value = "获得房屋资产信息-分页")
-	public DTO getHouseAssetsInfo(@RequestParam(value = "asc") int asc,
-	                              @RequestBody HouseAssetsCD cd){
-	return houseAssetsService.getHouseAssetsInfo(cd,asc);
+	public DTO getHouseAssetsPage(@RequestBody HouseAssetsCD cd){
+	return houseAssetsService.getHouseAssetsPage(cd);
 	}
 
 	@GetMapping("/menu")

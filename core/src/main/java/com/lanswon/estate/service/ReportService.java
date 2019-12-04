@@ -8,6 +8,7 @@ import com.lanswon.estate.bean.cd.RentReportCD;
 import com.lanswon.estate.bean.cd.ReportCD;
 import com.lanswon.estate.bean.vo.report.ReportHouseAssetsVO;
 import com.lanswon.estate.bean.vo.report.ReportHouseResourceVO;
+import com.lanswon.estate.bean.vo.report.ReportHouseVO;
 import com.lanswon.estate.mapper.DicAgencyMapper;
 import com.lanswon.estate.mapper.HouseResourceMapper;
 import com.lanswon.estate.mapper.ReportMapper;
@@ -46,43 +47,20 @@ public class ReportService {
 	}
 
 
+
 	public DTO getHouseReport(ReportCD cd) {
 		log.info("获得房源报表");
 
-		// 0.空就是查所有
-		if (cd.getAgency().isEmpty()) {
-			cd.setAgency(dicAgencyMapper.getAllAgencyId());
-		}
+		List<ReportHouseVO> houseResourceReportlist = reportMapper.getHouseResourceReport(cd);
 
-		List reportHouseResourceVOS = new ArrayList<ReportHouseResourceVO>();
 
-		// 1.查询所有
-		cd.getAgency().forEach(aLong -> {
-			List<ReportHouseResourceVO> houseResourceReportlist = reportMapper.getHouseResourceReport(aLong, cd);
-
-			if (!houseResourceReportlist.isEmpty()){
-				houseResourceReportlist.forEach(reportHouseResourceVO -> {
-					// 房源总面积
-					reportHouseResourceVO.setTotalResourceArea(houseResourceMapper.getTotalResourceAreaByAgencyId(aLong));
-					// 房源有证面积
-					reportHouseResourceVO.setTotalResourceYzArea(houseResourceMapper.getTotalResourceYzAreaByAgencyId(aLong));
-					// 房源无证面积
-					reportHouseResourceVO.setTotalResourceWzArea(houseResourceMapper.getTotalResourceWzAreaByAgencyId(aLong));
-					// 房源总个数
-					reportHouseResourceVO.setTotalResourceNum(houseResourceMapper.getTotalResourceNumByAgencyId(aLong));
-
-					reportHouseResourceVOS.add(reportHouseResourceVO);
-				});
-			}
-		});
-
-		if (reportHouseResourceVOS.isEmpty()) {
+		if (houseResourceReportlist.isEmpty()) {
 			log.error("未查询到房产信息");
-			return new DataRtnDTO<>(CustomRtnEnum.ERROR_EMPTY_RESULT.getStatus(), CustomRtnEnum.ERROR_EMPTY_RESULT.getMsg(), reportHouseResourceVOS);
+			return new DataRtnDTO<>(CustomRtnEnum.ERROR_EMPTY_RESULT.getStatus(), CustomRtnEnum.ERROR_EMPTY_RESULT.getMsg(), houseResourceReportlist);
 		}
 
 		log.info(CustomRtnEnum.SUCCESS.toString());
-		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(), CustomRtnEnum.SUCCESS.getMsg(), reportHouseResourceVOS);
+		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(), CustomRtnEnum.SUCCESS.getMsg(), houseResourceReportlist);
 
 	}
 

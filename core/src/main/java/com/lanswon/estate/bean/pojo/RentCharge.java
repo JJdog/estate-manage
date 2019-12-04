@@ -20,7 +20,7 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName(value = "must_rent")
+@TableName(value = "money_rent_must")
 public class RentCharge extends BasePojo {
 
 
@@ -30,23 +30,13 @@ public class RentCharge extends BasePojo {
   @ApiModelProperty(value = "交租时间")
   private Date rentDate;
 
-  @ApiModelProperty(value = "年份")
-  private int rentYear;
-
-  @ApiModelProperty(value = "月份")
-  private long rentMonth;
 
   @ApiModelProperty(value = "应付款")
   private double mustCharge;
 
-  @ApiModelProperty(value = "实收款")
-  private double actualCharge;
-
-  @ApiModelProperty(value = "欠款")
-  private double arrears;
 
   @ApiModelProperty(value = "租金状态")
-  private int rentStatus;
+  private int isEnable;
 
 
 }

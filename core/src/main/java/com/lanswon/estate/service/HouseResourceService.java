@@ -12,12 +12,14 @@ import com.lanswon.estate.bean.cd.HouseResourceCD;
 import com.lanswon.estate.bean.pojo.HouseResource;
 import com.lanswon.estate.bean.vo.DetailHouseResourceVO;
 import com.lanswon.estate.bean.vo.HouseResourceMenuVO;
-import com.lanswon.estate.bean.vo.SimpleHouseResourceVO;
+import com.lanswon.estate.bean.vo.HouseResourcePageVO;
 import com.lanswon.estate.mapper.HouseResourceMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.text.DecimalFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -40,7 +42,10 @@ public class HouseResourceService {
 	 */
 	public DTO insertHouseResource(HouseResource houseResource) {
 		log.info("新增房源信息");
-
+		/* 创建时间 */
+		houseResource.setCreatedTime(new Date());
+		/* 每平方月租金 */
+		houseResource.setRentMoneyPerArea(Double.parseDouble(new DecimalFormat("#.##").format(houseResource.getRealRentCharge()/houseResource.getResourceArea())));
 		if (houseResourceMapper.insert(houseResource) == 0){
 			log.error(CustomRtnEnum.ERROR_BAD_SQL.toString());
 			return new SimpleRtnDTO(CustomRtnEnum.ERROR_BAD_SQL.getStatus(),CustomRtnEnum.ERROR_BAD_SQL.getMsg());
@@ -81,11 +86,11 @@ public class HouseResourceService {
 	}
 
 
-	public DTO getAllHouseResource(int asc, HouseResourceCD cd) {
+	public DTO getHouseResourcePage(HouseResourceCD cd) {
 
 		log.info("获得所有房源信息,第{}页,共{}条", cd.getPage(), cd.getLimit());
 
-		IPage<SimpleHouseResourceVO> houseResourcePageList = houseResourceMapper.getHouseResourcePageList(new Page<>(cd.getPage(), cd.getLimit()), asc,cd);
+		IPage<HouseResourcePageVO> houseResourcePageList = houseResourceMapper.getHouseResourcePage(new Page<>(cd.getPage(), cd.getLimit()),cd);
 
 		return rtnPageResult(houseResourcePageList);
 	}
@@ -106,20 +111,7 @@ public class HouseResourceService {
 
 	}
 
-	/**
-	 * 分页查询返回
-	 * @param pageList 结果
-	 * @return dto
-	 */
-	private DTO rtnPageResult(IPage pageList){
-		if(pageList.getSize() == 0){
-			log.error(CustomRtnEnum.ERROR_EMPTY_RESULT.toString());
-			return new SimpleRtnDTO(CustomRtnEnum.ERROR_EMPTY_RESULT.getStatus(),CustomRtnEnum.ERROR_EMPTY_RESULT.getMsg());
-		}
 
-		log.info(CustomRtnEnum.SUCCESS.toString());
-		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(),CustomRtnEnum.SUCCESS.getMsg(),pageList);
-	}
 
 
 	public DTO getHouseResourceMenuInfo() {
@@ -128,7 +120,7 @@ public class HouseResourceService {
 		log.info("获得地产下拉菜单信息");
 
 		List<HouseResource> landAssetsList = houseResourceMapper.selectList(Wrappers.<HouseResource>lambdaQuery()
-				.select(HouseResource::getId, HouseResource::getResourceName));
+				.select(HouseResource::getId,HouseResource::getBuildRoom));
 
 
 		if (landAssetsList.isEmpty()){
@@ -154,5 +146,21 @@ public class HouseResourceService {
 
 		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(),CustomRtnEnum.SUCCESS.getMsg(),resource);
 
+	}
+
+
+	/**
+	 * 分页查询返回
+	 * @param pageList 结果
+	 * @return dto
+	 */
+	private DTO rtnPageResult(IPage pageList){
+		if(pageList.getRecords().isEmpty()){
+			log.error(CustomRtnEnum.ERROR_EMPTY_RESULT.toString());
+			return new DataRtnDTO(CustomRtnEnum.ERROR_EMPTY_RESULT.getStatus(),CustomRtnEnum.ERROR_EMPTY_RESULT.getMsg(),pageList);
+		}
+
+		log.info(CustomRtnEnum.SUCCESS.toString());
+		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(),CustomRtnEnum.SUCCESS.getMsg(),pageList);
 	}
 }

@@ -5,19 +5,18 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lanswon.estate.bean.cd.DealCD;
 import com.lanswon.estate.bean.pojo.Deal;
-import com.lanswon.estate.bean.vo.DealStatusVO;
-import com.lanswon.estate.bean.vo.DetailDealVO;
-import com.lanswon.estate.bean.vo.SimpleDealVO;
-import com.lanswon.estate.bean.vo.SimpleWarnDealVO;
+import com.lanswon.estate.bean.vo.*;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 @Mapper
 public interface DealMapper extends BaseMapper<Deal> {
 
-	IPage<SimpleDealVO> getSimpleDealInfo(@Param(value = "page") Page<Object> page,
-	                                      @Param(value = "cd") DealCD cd);
+	IPage<DealPage> getDealInfoPage(@Param(value = "page") Page<Object> page,
+	                                @Param(value = "cd") DealCD cd);
 
 	DetailDealVO getDetailDealInfo(long id);
 
@@ -69,8 +68,8 @@ public interface DealMapper extends BaseMapper<Deal> {
 	 * @param cd 查询条件
 	 * @return 合同s
 	 */
-	IPage<SimpleDealVO> getNoReviewDealInfoPage(Page<Object> objectPage,
-	                                            @Param("cd") DealCD cd);
+	IPage<DealPage> getNoReviewDealInfoPage(Page<Object> objectPage,
+	                                        @Param("cd") DealCD cd);
 
 	/**
 	 * 获得预警合同信息
@@ -83,5 +82,8 @@ public interface DealMapper extends BaseMapper<Deal> {
 	                                          @Param("asc") int asc,
 	                                          @Param("day") int day);
 
-	boolean bindDealAndHouse(long id, Long aLong);
+
+	List<MustMoneyVO> getMustMoneyByDealId(long id);
+
+	List<TransFlowVO> getTransFlowByDealId(long id);
 }

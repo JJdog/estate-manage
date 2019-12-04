@@ -1,0 +1,27 @@
+
+
+### 获得当前月应收信息
+
+POST http://127.0.0.1:14000/estate/rent/date
+Content-Type: application/json
+
+{
+  "aid": 0,
+  "asc": 0,
+  "date": "2019-11-03T06:32:17.730Z",
+  "limit": 100,
+  "page": 1
+}
+
+### 缴费
+PUT http://127.0.0.1:14000/estate/rent/pay/
+Content-Type: application/json
+
+{
+  "certNo": "4001-1",
+  "fkMustMoneyId": 7889675428722941952,
+  "money": 1000,
+  "moneyDate": "2019-12-03T08:42:53.895Z"
+}
+
+###
