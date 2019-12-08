@@ -20,6 +20,7 @@ public class ExceptionAdviceRest {
 	@ResponseBody
 	@ExceptionHandler(value = Exception.class)
 	public DTO errorHandler(Exception e){
+
 		return new SimpleRtnDTO(CustomRtnEnum.ERROR.getStatus(),e.getMessage());
 	}
 

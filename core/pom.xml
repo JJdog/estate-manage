@@ -50,6 +50,11 @@
             <artifactId>spring-cloud-alibaba-nacos-discovery</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-alibaba-nacos-config</artifactId>
+        </dependency>
+
 
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -101,32 +106,32 @@
             </plugin>
 
 
-            <!--docker镜像build插件-->
-            <plugin>
-                <groupId>com.spotify</groupId>
-                <artifactId>dockerfile-maven-plugin</artifactId>
-                <version>1.4.10</version>
-                <executions>
-                    <execution>
-                        <id>default</id>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <!--这里指定打包镜像的名称${docker.registry}/${docker.image.prefix}/  -->
-                    <repository>jaswine.top:9950/estate</repository>
-                    <!--每次推至私服都最新的额 不指定tag默认为latest-->
-                    <tag>latest</tag>
-                    <!-- 这里是复制 jar 包到 docker 容器指定目录配置 -->
-                    <buildArgs>
-                        <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
-                    </buildArgs>
+            <!--&lt;!&ndash;docker镜像build插件&ndash;&gt;-->
+            <!--<plugin>-->
+            <!--    <groupId>com.spotify</groupId>-->
+            <!--    <artifactId>dockerfile-maven-plugin</artifactId>-->
+            <!--    <version>1.4.10</version>-->
+            <!--    <executions>-->
+            <!--        <execution>-->
+            <!--            <id>default</id>-->
+            <!--            <goals>-->
+            <!--                <goal>build</goal>-->
+            <!--            </goals>-->
+            <!--        </execution>-->
+            <!--    </executions>-->
+            <!--    <configuration>-->
+            <!--        &lt;!&ndash;这里指定打包镜像的名称${docker.registry}/${docker.image.prefix}/  &ndash;&gt;-->
+            <!--        <repository>jaswine.top:9950/estate</repository>-->
+            <!--        &lt;!&ndash;每次推至私服都最新的额 不指定tag默认为latest&ndash;&gt;-->
+            <!--        <tag>latest</tag>-->
+            <!--        &lt;!&ndash; 这里是复制 jar 包到 docker 容器指定目录配置 &ndash;&gt;-->
+            <!--        <buildArgs>-->
+            <!--            <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>-->
+            <!--        </buildArgs>-->
 
-                    <dockerfile>${project.basedir}/src/main/docker/Dockerfile</dockerfile>
-                </configuration>
-            </plugin>
+            <!--        <dockerfile>${project.basedir}/src/main/docker/Dockerfile</dockerfile>-->
+            <!--    </configuration>-->
+            <!--</plugin>-->
         </plugins>
     </build>
 

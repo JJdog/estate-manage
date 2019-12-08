@@ -13,18 +13,18 @@ import com.lanswon.estate.bean.cd.DealCD;
 import com.lanswon.estate.bean.pojo.Deal;
 import com.lanswon.estate.bean.pojo.DealAndHouse;
 import com.lanswon.estate.bean.pojo.MoneyDepositMust;
-import com.lanswon.estate.bean.vo.DealStatusVO;
-import com.lanswon.estate.bean.vo.DetailDealVO;
-import com.lanswon.estate.bean.vo.DealPage;
-import com.lanswon.estate.bean.vo.DetailHouseResourceVO;
+import com.lanswon.estate.bean.vo.*;
 import com.lanswon.estate.mapper.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.apache.xmlbeans.impl.xb.xsdschema.RedefineDocument.Redefine.type;
 
 /**
  * 合同service
@@ -82,13 +82,14 @@ public class DealService {
 				throw new RuntimeException("错误的合同类型");
 		}
 
+		changeSerial();
 		// 合同编号
 		deal.setDealSerial(SerialNo.builder(SerialEnum.PREFIX_TIME_YEAR_MONTH_SUFFIX)
 				.withPrefix(dealType + "-")
 				.withSuffix("-" + String.format("%03d", serialNo.incrementAndGet()))
 				.generateSerial());
 		deal.setCreatedTime(new Date());
-		// todo 多算了一天
+		// 推算结束时间
 		GregorianCalendar a = new GregorianCalendar();
 		a.setTime(DateTimeUtil.addMonth(deal.getStartTime(), deal.getRentMonth()).getTime());
 		a.add(Calendar.DAY_OF_YEAR,-1);
@@ -145,7 +146,7 @@ public class DealService {
 			throw new RuntimeException("插入应收保证金失败");
 		}
 
-		// 4.合同的租金明细
+		// 4.2.合同的租金明细
 		log.info("插入应收租金明细");
 		rentChargeService.computeRent(deal).forEach(rentCharge -> {
 			log.info("插入租金信息,合同编号{},年月{}", rentCharge.getFkDealId(), rentCharge.getRentDate());
@@ -294,7 +295,7 @@ public class DealService {
 
 		// 0.只有未审核可修改
 		if (statusVO.getDealReviewStatus() != 1){
-			log.error("合同{}已通过审核，不可冲洗审核",id);
+			log.error("合同{}已通过审核，不可重新审核",id);
 			return new SimpleRtnDTO(500,"合同已通过审核，不可重新审核");
 		}
 
@@ -305,7 +306,7 @@ public class DealService {
 		}
 
 		// 2.1.通过审核(启用租金)
-		if (status == 2){
+		if (status == 1){
 			log.info("启用租金");
 			if (!rentChargeMapper.enableRentCharge(id)){
 				log.error("启用租金失败");
@@ -318,7 +319,7 @@ public class DealService {
 			// 2.2.1.释放房源
 			if (!houseResourceMapper.updateResource2FreeRent(dealMapper.getHouseResourceIdByDealId(id))){
 				log.error("释放房源失败");
-				throw  new RuntimeException("释放房源失败");
+				throw new RuntimeException("释放房源失败");
 			}
 
 			// 2.2.2冻结租金
@@ -348,7 +349,10 @@ public class DealService {
 			throw  new RuntimeException("终止合同-释放房源失败");
 		}
 
-		// 3.计算尾款
+		// todo 未完成代码
+		// 3.未完成租金冻结
+
+		// 4.计算尾款
 		rentChargeService.computeTail(id,date);
 
 		log.info(CustomRtnEnum.SUCCESS.toString());
@@ -358,7 +362,7 @@ public class DealService {
 	public DTO getNoReviewDealInfoPage(DealCD cd) {
 		log.info("获得未审核合同信息---分页");
 
-		IPage<DealPage> dealInfoList = dealMapper.getNoReviewDealInfoPage(new Page<>(cd.getPage(), cd.getLimit()), cd);
+		IPage<NoRentDealPage> dealInfoList = dealMapper.getNoReviewDealInfoPage(new Page<>(cd.getPage(), cd.getLimit()), cd);
 
 
 		if (dealInfoList.getSize() == 0) {
@@ -369,5 +373,36 @@ public class DealService {
 		log.info(CustomRtnEnum.SUCCESS.toString());
 
 		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(), CustomRtnEnum.SUCCESS.getMsg(), dealInfoList);
+	}
+
+	/**
+	 * 修改序列号
+	 * <P>
+	 *     1.获得对应类型凭证的最新凭证号
+	 *     2.如果时间和获得的凭证号的时间是不一样的那么将序列号归'0'[return]
+	 *     3.如果是同一天，那么直接给对应的序列号增加器赋值[return]
+	 *
+	 *     Tips：
+	 *     1.最新的序列号获得不能使用时间作为但一维度去查询，要加上序列号的后缀
+	 * </P>
+	 */
+	private void changeSerial(){
+		// 判断是否为同一天
+		String latestSeq = dealMapper.getLatestSeqByType();
+		if (latestSeq == null){
+			serialNo.set(0);
+			return;
+		}
+		String s = latestSeq.substring(3, 9);
+		StringBuilder builder = new StringBuilder();
+		builder.append(LocalDate.now().getYear());
+		builder.append(LocalDate.now().getMonthValue());
+
+		// 不是同一天(序列归0)
+		if (!s.equals(builder)){
+			serialNo.set(0);
+			return;
+		}
+		serialNo.set(Integer.valueOf(latestSeq.substring(10)));
 	}
 }

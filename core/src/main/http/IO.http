@@ -2,3 +2,11 @@
 ### 导出应收款
 POST http://127.0.0.1:14000/estate/io/flow/out
 Content-Type:
+
+
+### 导入地产
+POST http://127.0.0.1:14000/estate/io/land/in
+
+
+
+< /Users/jaswine/Desktop/土地资产模版.xlsx

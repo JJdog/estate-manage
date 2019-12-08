@@ -6,22 +6,22 @@ Content-Type: application/json
 
 {
   "createdBy": 0,
-  "dealType": 1,
-  "deposit": 1000,
+  "dealType": 2,
+  "deposit": 2000,
   "fkHouseResourceId": [
-    7889666806669287424,
-    7889667042477252608
+    7890096951907360768
   ],
   "fkRenterId": 7885094205832601600,
   "freeRentMonth": 0,
   "isNewRent": 1,
-  "payType": 3,
+  "payType": 1,
   "rentMonth": 12,
-  "startTime": "2019-11-29T01:12:19.767Z"
+  "startTime": "2019-12-03T01:12:19.767Z"
 }
 
 ### 获得合同信息
-POST http://127.0.0.1:14000/estate/deal/all
+#POST http://127.0.0.1:14000/estate/deal/all
+POST http://192.168.10.56:14000/estate/deal/all
 Content-Type: application/json
 
 {
@@ -50,5 +50,41 @@ Content-Type: application/json
   "renterId": 0,
   "startTime": ""
 }
+
+### 未审核合同
+POST http://127.0.0.1:14000/estate/deal/all/noreview
+Content-Type: application/json
+
+{
+  "agencyId": 0,
+  "aid": 0,
+  "asc": 0,
+  "dealExistStatusCode": 0,
+  "dealName": "",
+  "dealReviewStatusCode": 0,
+  "dealTypeCode": 0,
+  "endTime": "",
+  "houseUsageId": 0,
+  "lessorId": 0,
+  "limit": 10,
+  "maxGuideRentCharge": 0,
+  "maxOriginRentCharge": 0,
+  "maxRealRentCharge": 0,
+  "maxRentMonth": 0,
+  "maxResourceArea": 0,
+  "minGuideRentCharge": 0,
+  "minOriginRentCharge": 0,
+  "minRealRentCharge": 0,
+  "minRentMonth": 0,
+  "minResourceArea": 0,
+  "page": 1,
+  "payTypeCode": 0,
+  "renterId": 0,
+  "startTime": ""
+}
+
+### 合同审核
+PUT http://127.0.0.1:14000/estate/deal/review/7890405728049471488/1
+Content-Type: application/json
 
 ###

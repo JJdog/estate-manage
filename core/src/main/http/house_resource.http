@@ -12,7 +12,7 @@ Content-Type: application/json
   "fkHouseAssetsId": 7885752748551397376,
   "guideRentCharge": 5456,
   "originRentCharge": 5000,
-  "park": "睦邻中心",
+  "park": "测试中心",
   "realRentCharge": 5500,
   "remark": "测试003",
   "rentStatus": 0,

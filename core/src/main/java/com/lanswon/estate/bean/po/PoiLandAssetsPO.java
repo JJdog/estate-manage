@@ -3,8 +3,10 @@ package com.lanswon.estate.bean.po;
 import cn.afterturn.easypoi.excel.annotation.Excel;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.lanswon.commons.web.pojo.BasePojo;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 
@@ -15,19 +17,26 @@ import java.util.Date;
  */
 @Data
 @TableName(value = "land_assets")
-public class PoiLandAssetsPO {
+public class PoiLandAssetsPO extends BasePojo {
 
 	/** 房产名称 */
-	@Excel(name = "地产名称")
-	private String assetsName;
+	@Excel(name = "土地证号*")
+	private String landNo;
 
-
-	@Excel(name = "产权人名称")
+	@Excel(name = "产权人名称*")
 	@TableField(exist = false)
 	@NotNull(message = "产权人不可为空")
+	@NotBlank(message = "产权人不可为空")
 	private String owner;
 	/** 房产所有权人 */
-	private long fkOwnId;
+	private Long fkOwnId;
+
+	@Excel(name = "管理单位*")
+	@TableField(exist = false)
+	@NotNull(message = "管理单位不可为空")
+	private String agencyName;
+	/** 管理单位id */
+	private Long fkAgencyId;
 
 	/** 座落 */
 	@Excel(name = "座落")
@@ -41,13 +50,21 @@ public class PoiLandAssetsPO {
 	@Excel(name = "图号")
 	private String picNum;
 
-
-	@Excel(name = "管理单位")
+	@Excel(name = "地类(通途)")
 	@TableField(exist = false)
-	@NotNull(message = "管理单位不可为空")
-	private String agencyName;
-	/** 管理单位id */
-	private long fkAgencyId;
+	private String landUsage;
+	private Long fkLandUsageId;
+
+	@Excel(name = "使用权类型")
+	@TableField(exist = false)
+	private String landNature;
+	private Long fkLandNatureId;
+
+	@Excel(name = "有证面积*")
+	private  double yzArea;
+
+	@Excel(name = "无证面积*")
+	private  double wzArea;
 
 	@Excel(name = "使用权面积")
 	private Double assetsArea;

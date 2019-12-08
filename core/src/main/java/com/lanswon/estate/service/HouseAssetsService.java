@@ -1,5 +1,6 @@
 package com.lanswon.estate.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -8,6 +9,7 @@ import com.lanswon.commons.web.rtn.CustomRtnEnum;
 import com.lanswon.commons.web.rtn.DataRtnDTO;
 import com.lanswon.commons.web.rtn.SimpleRtnDTO;
 import com.lanswon.estate.bean.cd.HouseAssetsCD;
+import com.lanswon.estate.bean.po.DmenuVO;
 import com.lanswon.estate.bean.pojo.HouseAssets;
 import com.lanswon.estate.bean.vo.HouseAssetsPageVO;
 import com.lanswon.estate.mapper.HouseAssetsMapper;
@@ -36,10 +38,16 @@ public class HouseAssetsService {
 		log.info("新增房屋资产信息");
 		houseAssets.setCreatedTime(new Date());
 
+		if (houseAssetsMapper.selectOne(new QueryWrapper<HouseAssets>().eq("house_id", houseAssets.getHouseId())) != null){
+			log.error("房产证号已存在");
+			return new SimpleRtnDTO(CustomRtnEnum.RESOURCE_NON_EXIST.getStatus(),"房产证号已存在");
+		}
+
 		if (houseAssetsMapper.insert(houseAssets) == 0){
 			log.error(CustomRtnEnum.ERROR_BAD_SQL.toString());
 			return  new SimpleRtnDTO(CustomRtnEnum.ERROR_BAD_SQL.getStatus(),CustomRtnEnum.ERROR_BAD_SQL.getMsg());
 		}
+
 
 		log.info(CustomRtnEnum.SUCCESS.toString());
 
@@ -60,8 +68,13 @@ public class HouseAssetsService {
 	}
 
 	public DTO updateHouseAssets(HouseAssets houseAssets) {
-
 		log.info("更新id为:{}的房屋资产信息",houseAssets.getId());
+
+		if (houseAssetsMapper.selectOne(new QueryWrapper<HouseAssets>().eq("house_id", houseAssets.getHouseId())) != null){
+			log.error("房产证号已存在");
+			return new SimpleRtnDTO(CustomRtnEnum.RESOURCE_NON_EXIST.getStatus(),"房产证号已存在");
+		}
+
 		if (houseAssetsMapper.updateById(houseAssets) == 0){
 			log.error(CustomRtnEnum.RESOURCE_NON_EXIST.toString());
 			return new SimpleRtnDTO(CustomRtnEnum.RESOURCE_NON_EXIST.getStatus(),CustomRtnEnum.RESOURCE_NON_EXIST.getMsg());
@@ -90,13 +103,12 @@ public class HouseAssetsService {
 	public DTO getHouseAssetsInfoWithoutPage() {
 		log.info("获得房产下拉菜单信息");
 
-		List<HouseAssets> houseAssetsList = houseAssetsMapper.selectList(Wrappers.<HouseAssets>lambdaQuery()
-				.select(HouseAssets::getId, HouseAssets::getAssetsName));
+		List<DmenuVO> houseAssetsList = houseAssetsMapper.getHouseAssetsInfoWithoutPage();
 
 
 		if (houseAssetsList.isEmpty()){
 			log.error(CustomRtnEnum.ERROR_EMPTY_RESULT.toString());
-			return new SimpleRtnDTO(CustomRtnEnum.ERROR_EMPTY_RESULT.getStatus(),CustomRtnEnum.ERROR_EMPTY_RESULT.getMsg());
+			return new DataRtnDTO<>(CustomRtnEnum.ERROR_EMPTY_RESULT.getStatus(),CustomRtnEnum.ERROR_EMPTY_RESULT.getMsg(),houseAssetsList);
 		}
 
 		log.info(CustomRtnEnum.SUCCESS.toString());

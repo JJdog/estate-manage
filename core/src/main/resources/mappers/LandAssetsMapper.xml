@@ -7,31 +7,37 @@
         t.id,
         t.assets_name,
         t.fk_own_id ,
+        t.land_no,
         t1.name AS owner,
+        t.fk_agency_id,
+        t4.name AS agencyName,
         t.assets_location,
         t.land_num,
         t.pic_num,
-        t.use_type AS useTypeCode,
+        t.fk_land_usage_id AS useTypeCode,
         t2.name AS useType,
         t.money,
-        t.use_right AS useRightCode,
+        t.fk_land_nature_id AS useRightCode,
         t3.name AS useRight,
         t.end_time,
         t.assets_area,
         t.self_area,
         t.share_area,
+        t.yz_area,
+        t.wz_area,
         t.remark
         FROM land_assets t
         LEFT JOIN dic_assets_co t1 ON t.fk_own_id = t1.id
-        LEFT JOIN dic_land_usage t2 ON t.use_type = t2.id
-        LEFT JOIN dic_land_nature t3 ON t.use_right = t3.id
+        LEFT JOIN dic_land_usage t2 ON t.fk_land_usage_id = t2.id
+        LEFT JOIN dic_land_nature t3 ON t.fk_land_nature_id = t3.id
+        LEFT JOIN dic_agency t4 ON t.fk_agency_id = t4.id
         WHERE 1=1
         <if test="cd.ownId != 0 ">
             AND t.fk_own_id = #{cd.ownId}
         </if>
 
-        <if test="cd.landNum != 0">
-            AND t.land_num = #{cd.landNum}
+        <if test="cd.landNo != null and cd.landNo != ''">
+            AND t.land_no = #{cd.landNo}
         </if>
 
         <if test="cd.location != ''">

@@ -18,7 +18,7 @@
         CASE t.sell_status WHEN 0 THEN '未出售' WHEN 1 THEN '已出售' END AS sellStatus,
         t.remark,
         t1.id AS assetsId,
-        t1.assets_name assetsName
+        t1.fk_house_name_id assetsName
         FROM house_resource t
         LEFT JOIN house_assets t1 ON t.fk_house_assets_id = t1.id
         LEFT JOIN dic_agency t2 ON t.fk_agency_id = t2.id
@@ -69,7 +69,7 @@
     <select id="getHouseResourceDetailInfo" resultType="com.lanswon.estate.bean.vo.DetailHouseResourceVO">
         SELECT t.id,
                t1.id                                                      AS assetsId,
-               t1.assets_name,
+               t1.fk_house_name_id,
                t3.name                                                    AS houseOwner,
                t1.total_level,
                t.fk_agency_id                                             AS agencyId,
@@ -99,7 +99,7 @@
     </select>
     <select id="getNoRentHouseResource" resultType="com.lanswon.estate.bean.vo.HouseResourceMenuVO">
         SELECT t.id,
-               CONCAT(t1.name,t.park,ifnull(t.build_no,'?'),'栋',ifnull(t.build_level,'?'),'层',ifnull(t.build_room,'')) AS  resourseName
+               CONCAT(t1.name,t.park,ifnull(t.build_no,'/'),'栋',ifnull(t.build_level,'/'),'层',ifnull(t.build_room,'')) AS  resourceName
         FROM house_resource t
             LEFT JOIN dic_agency t1 ON t.fk_agency_id = t1.id
         WHERE t.rent_status = 0
@@ -130,7 +130,7 @@
             t6.name AS  houseUsage,
             t.remark,
             t3.id AS assetsId,
-            t3.assets_name,
+            t3.fk_house_name_id,
             t4.name AS houseOwner,
             t3.total_level,
             t3.location AS houseLocation,

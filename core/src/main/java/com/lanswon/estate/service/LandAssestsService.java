@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -37,6 +38,7 @@ public class LandAssestsService {
 
 	public DTO insertLandAssets(LandAssets landAssets) {
 		log.info("新增土地资产信息");
+		landAssets.setCreatedTime( new Date());
 		if (landAssetsMapper.insert(landAssets) == 0){
 			log.error(CustomRtnEnum.ERROR_BAD_SQL.toString());
 			return  new SimpleRtnDTO(CustomRtnEnum.ERROR_BAD_SQL.getStatus(),CustomRtnEnum.ERROR_BAD_SQL.getMsg());
@@ -62,6 +64,7 @@ public class LandAssestsService {
 	public DTO updateLandAssets(LandAssets landAssets) {
 
 		log.info("更新id为:{}的土地资产信息",landAssets.getId());
+		landAssets.setUpdatedTime(new Date());
 		if (landAssetsMapper.updateById(landAssets) == 0){
 			log.error(CustomRtnEnum.RESOURCE_NON_EXIST.toString());
 			return new SimpleRtnDTO(CustomRtnEnum.RESOURCE_NON_EXIST.getStatus(),CustomRtnEnum.RESOURCE_NON_EXIST.getMsg());
@@ -77,7 +80,7 @@ public class LandAssestsService {
 		IPage<LandAssetsVO> landAssetsPageList = landAssetsMapper.getLandAssetsPageList(new Page(cd.getPage(),cd.getLimit()), asc,cd);
 		if (landAssetsPageList.getRecords().isEmpty()){
 			log.error(CustomRtnEnum.ERROR_EMPTY_RESULT.toString());
-			return new SimpleRtnDTO(CustomRtnEnum.ERROR_EMPTY_RESULT.getStatus(),CustomRtnEnum.ERROR_EMPTY_RESULT.getMsg());
+			return new DataRtnDTO<>(CustomRtnEnum.ERROR_EMPTY_RESULT.getStatus(),CustomRtnEnum.ERROR_EMPTY_RESULT.getMsg(),landAssetsPageList);
 		}
 
 		log.info(CustomRtnEnum.SUCCESS.toString());

@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -27,6 +29,11 @@ public class UserService {
 
 	public DTO bindDepartment(Long uid, Long did) {
 		log.info("绑定用户和部门");
+		// 删除原有的
+		Map<String, Object> map = new HashMap<>();
+		map.put("fk_user_id",uid);
+		userMapper.deleteByMap(map);
+		// 新增
 		MidUserInfo userInfo = new MidUserInfo(uid, did);
 		userInfo.setCreatedTime(new Date());
 		if (userMapper.insert(userInfo) == 0){
@@ -40,6 +47,9 @@ public class UserService {
 
 	public DTO getUserInfoByUid(Long uid) {
 		SimpleUserDTO userDTO = uumProvider.getSimpleUserInfoByUid(uid).getData();
+		if (userMapper.getAgencyByUid(uid) == null){
+			return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(),CustomRtnEnum.SUCCESS.getMsg(),null);
+		}
 		userDTO.setAgency(userMapper.getAgencyByUid(uid).getAgency());
 		userDTO.setAgencyId(userMapper.getAgencyByUid(uid).getAgencyId());
 

@@ -51,6 +51,7 @@ public class DealRest {
 		return dealService.getDealInfoPage(cd);
 	}
 
+	@Deprecated()
 	@GetMapping(value = "/detail/{id}")
 	@ApiOperation(value = "获得合同具体信息")
 	public DTO getDetailDealInfo(@PathVariable(value = "id")long id){

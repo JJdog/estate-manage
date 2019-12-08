@@ -13,6 +13,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -32,8 +33,7 @@ public class HouseAssets extends BasePojo {
 
 	@ApiModelProperty(value = " 房产名称 ",required = true)
 	@NotNull(message = "房产名称不可为空")
-	@NotBlank(message = "房产名称不可为空")
-	private String assetsName;
+	private long fkHouseNameId;
 
 
 	@ApiModelProperty(value = " 房产证id ",required = true)
@@ -84,7 +84,8 @@ public class HouseAssets extends BasePojo {
 
 	@ApiModelProperty(value = "有证面积",required = true)
 	@NotNull(message = "有证面积不可为空")
-	private double yzArea;
+	@Min(value = 1,message = "有证面积不可为空")
+	private Double yzArea;
 
 	@ApiModelProperty(value = "无证面积",required = true)
 	@NotNull(message = "无证面积不可为空")

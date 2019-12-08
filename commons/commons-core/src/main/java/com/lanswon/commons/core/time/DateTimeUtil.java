@@ -40,6 +40,8 @@ public final class DateTimeUtil {
 		return getDate(LocalDate.now(),DateFormatEnum.YYYY_MM_DD);
 	}
 
+
+
 	/**
 	 * 获得日期 - 指定返回格式
 	 * @param date 本地日期对象

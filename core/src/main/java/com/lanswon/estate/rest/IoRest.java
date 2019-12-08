@@ -22,7 +22,7 @@ import java.util.Date;
  * @author jaswine
  */
 @RestController
-@RequestMapping(value = "/io/")
+@RequestMapping(value = "/io")
 @Api(tags = "导入导出")
 public class IoRest {
 
@@ -30,18 +30,19 @@ public class IoRest {
 	private IoService ioService;
 
 
-	@PostMapping(value = "land/in")
-	public DTO importLandAssets(@RequestParam(value = "file")MultipartFile file){
+	@PostMapping(value = "/land/in")
+	public DTO importLandAssets(@RequestParam(value = "file") MultipartFile file){
 		return ioService.importLandAssets(file);
 	}
 
-	@PostMapping(value = "houseassets")
-	public DTO importHouseAssets(@RequestParam(value = "file")MultipartFile file){
+	@PostMapping(value = "/house/in")
+	public DTO importHouseAssets(@RequestParam(value = "file") MultipartFile file){
 		return ioService.importHouseAssets(file);
 	}
 
-	@PostMapping(value = "houseresource")
-	public DTO importHouseResource(@RequestParam(value = "file")MultipartFile file){
+
+	@PostMapping(value = "/resource/in")
+	public DTO importHouseResource(@RequestParam(value = "file") MultipartFile file){
 		return ioService.importHouseResource(file);
 	}
 
@@ -50,12 +51,12 @@ public class IoRest {
 	//
 	//}
 
-	@PostMapping(value = "flow/in")
+	@PostMapping(value = "/flow/in")
 	public DTO importTransFlow(@RequestParam(value = "file")MultipartFile file){
 		return ioService.importTransFlow(file);
 	}
 
-	@PostMapping(value = "flow/out")
+	@PostMapping(value = "/flow/out")
 	public void exportTransFlow(HttpServletResponse response,
 	                            @RequestBody ExportTransFlowCD cd) throws IOException {
 		response.setHeader("content-Type", "application/vnd.ms-excel");

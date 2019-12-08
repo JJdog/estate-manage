@@ -68,7 +68,7 @@ public interface DealMapper extends BaseMapper<Deal> {
 	 * @param cd 查询条件
 	 * @return 合同s
 	 */
-	IPage<DealPage> getNoReviewDealInfoPage(Page<Object> objectPage,
+	IPage<NoRentDealPage> getNoReviewDealInfoPage(Page<Object> objectPage,
 	                                        @Param("cd") DealCD cd);
 
 	/**
@@ -86,4 +86,8 @@ public interface DealMapper extends BaseMapper<Deal> {
 	List<MustMoneyVO> getMustMoneyByDealId(long id);
 
 	List<TransFlowVO> getTransFlowByDealId(long id);
+
+	@Select("SELECT t.deal_serial FROM deal t ORDER BY created_time DESC LIMIT 1")
+	String getLatestSeqByType();
+
 }

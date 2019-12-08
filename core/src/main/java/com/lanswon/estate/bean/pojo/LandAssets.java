@@ -4,6 +4,7 @@ package com.lanswon.estate.bean.pojo;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lanswon.commons.web.pojo.BasePojo;
+import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,12 +22,18 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName(value = "land_assets")
+@ApiModel(value = "土地资产POJO")
 public class LandAssets extends BasePojo {
 
   /** 产权拥有人 */
   private long fkOwnId;
   /** 坐落 */
   private String assetsLocation;
+
+  private String landNo;
+
+  private Long fkAgencyId;
+
   /** 地号 */
   private String landNum;
   /** 图号 */
@@ -41,11 +48,15 @@ public class LandAssets extends BasePojo {
   @JsonFormat(pattern = "yyyy年MM月dd日 HH:mm:ss:ms")
   private Date endTime;
   /** 使用权面积 */
-  private double assetsQueue;
+  private double assetsArea;
   /** 独有面积 */
-  private double selfQueue;
+  private double selfArea;
   /** 公摊面积 */
-  private double shareQueue;
+  private double shareArea;
+
+	private double yzArea;
+
+	private double wzArea;
   /** 备注 */
   private String remark;
 

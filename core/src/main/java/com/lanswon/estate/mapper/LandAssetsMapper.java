@@ -9,7 +9,10 @@ import com.lanswon.estate.bean.pojo.LandAssets;
 import com.lanswon.estate.bean.vo.LandAssetsVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * 土地资产mapper
@@ -22,4 +25,8 @@ public interface LandAssetsMapper extends BaseMapper<LandAssets> {
 
 
 	IPage<LandAssetsVO> getLandAssetsPageList(@Param("page") Page page, @Param("asc") int asc, @Param("cd")LandAssetsCD cd);
+
+	@Select("SELECT concat(t.land_no,'$',t.id) FROM land_assets t")
+	List<String> getAllLandNoAndId();
+
 }

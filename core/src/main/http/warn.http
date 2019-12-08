@@ -1,0 +1,17 @@
+
+
+
+### 租金预警
+#POST http://127.0.0.1:14000/estate/warn/rent
+POST http://61.160.81.178:21002/estate/warn/rent
+Content-Type: application/json
+
+{
+  "aid": 0,
+  "asc": 0,
+  "day": 90,
+  "limit": 10,
+  "page": 1
+}
+
+###

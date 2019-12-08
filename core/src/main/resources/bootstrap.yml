@@ -1,0 +1,63 @@
+# 以下配置必须要放置在bootstrap.yml文件否则无法在 nacos 读取配置
+spring:
+  application:
+    name: ESTATE-MANAGE
+
+server:
+  port: 14000
+  servlet:
+    context-path: /estate
+---
+spring:
+  profiles:
+    active: c1
+
+---
+# nacos 配置
+spring:
+  cloud:
+    nacos:
+      config:
+        # 方便和服务发现分开,更能够体现性能
+        server-addr: 192.168.44.78:8848
+        file-extension: yaml
+        refreshable-dataids: ${spring.application.name}-c1.yaml
+
+---
+spring:
+  datasource:
+    druid:
+      driver-class-name: com.mysql.jdbc.Driver
+      max-active: 10
+      initial-size: 5
+      min-idle: 2
+      max-wait: 60000
+      pool-prepared-statements: true
+      web-stat-filter:
+        enabled: true
+        url-pattern: /druid
+
+mybatis-plus:
+  mapper-locations: classpath:mappers/*.xml
+  check-config-location: true
+  type-aliases-package: com.lanswon.estate.bean.pojo
+  configuration:
+    jdbc-type-for-null: null
+    cache-enabled: false
+    multiple-result-sets-enabled: true
+    default-executor-type: reuse
+    lazy-loading-enabled: false
+    aggressive-lazy-loading: true
+    default-statement-timeout: 3000
+    call-setters-on-nulls: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+    auto-mapping-behavior: partial
+    auto-mapping-unknown-column-behavior: none
+    default-enum-type-handler: org.apache.ibatis.type.EnumTypeHandler
+    return-instance-for-empty-row: false
+    local-cache-scope: session
+---
+logging:
+  level:
+    com.lanswon.estate : debug

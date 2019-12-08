@@ -12,7 +12,6 @@ import java.util.Date;
 @Data
 public class DealCD extends BaseCd {
 
-	private int asc;
 
 	/** 合同名称 */
 	private String dealName;

@@ -45,7 +45,7 @@ public class HouseResourceService {
 		/* 创建时间 */
 		houseResource.setCreatedTime(new Date());
 		/* 每平方月租金 */
-		houseResource.setRentMoneyPerArea(Double.parseDouble(new DecimalFormat("#.##").format(houseResource.getRealRentCharge()/houseResource.getResourceArea())));
+		//houseResource.setRentMoneyPerArea(Double.parseDouble(new DecimalFormat("#.##").format(houseResource.getRealRentCharge()/houseResource.getResourceArea())));
 		if (houseResourceMapper.insert(houseResource) == 0){
 			log.error(CustomRtnEnum.ERROR_BAD_SQL.toString());
 			return new SimpleRtnDTO(CustomRtnEnum.ERROR_BAD_SQL.getStatus(),CustomRtnEnum.ERROR_BAD_SQL.getMsg());

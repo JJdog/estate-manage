@@ -1,5 +1,4 @@
-package com.lanswon.estate.service;
-
+package com.lanswon.estate.service.dic;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -11,34 +10,29 @@ import com.lanswon.commons.web.rtn.CustomRtnEnum;
 import com.lanswon.commons.web.rtn.DataRtnDTO;
 import com.lanswon.commons.web.rtn.SimpleRtnDTO;
 import com.lanswon.estate.bean.DatabaseConstants;
-import com.lanswon.estate.bean.pojo.Renter;
-import com.lanswon.estate.mapper.RenterMapper;
+import com.lanswon.estate.bean.cd.SimpleCD;
+import com.lanswon.estate.bean.pojo.dic.DicHouseName;
+import com.lanswon.estate.mapper.DicHouseNameMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Date;
 import java.util.List;
+
 
 @Service
 @Slf4j
-public class RenterService {
+public class DicHouseNameService {
 
 
 	@Resource
-	private RenterMapper renterMapper;
+	private DicHouseNameMapper dicHouseNameMapper;
 
 
-	/**
-	 * 新增共有类型情况
-	 * @param renter 共有类型
-	 * @return dto
-	 */
-	public DTO insertRenter(Renter renter) {
+	public DTO insertHouseName(DicHouseName houseName) {
 		log.info("新增共有类型数据");
-		renter.setCreatedTime(new Date());
-		if (renterMapper.insert(renter) == 0){
+		if (dicHouseNameMapper.insert(houseName) == 0){
 			log.error(CustomRtnEnum.ERROR_BAD_SQL.toString());
 			return new SimpleRtnDTO(CustomRtnEnum.ERROR_BAD_SQL.getStatus(),CustomRtnEnum.ERROR_BAD_SQL.getMsg());
 		}
@@ -48,16 +42,11 @@ public class RenterService {
 
 	}
 
-	/**
-	 * 删除共有情况
-	 * @param id 共有类型id
-	 * @return dto
-	 */
 	@Transactional(rollbackFor = Exception.class)
-	public DTO deleteRenter(String id) {
+	public DTO deleteHouseName(String id) {
 		log.info("删除id为-->{}的共有情况数据",id);
 		// 删除 共有情况
-		if (renterMapper.deleteById(id) == 0){
+		if (dicHouseNameMapper.deleteById(id) == 0){
 			log.error(CustomRtnEnum.RESOURCE_NON_EXIST.toString());
 			return new SimpleRtnDTO(CustomRtnEnum.RESOURCE_NON_EXIST.getStatus(),CustomRtnEnum.RESOURCE_NON_EXIST.getMsg());
 		}
@@ -67,15 +56,10 @@ public class RenterService {
 		return new SimpleRtnDTO(CustomRtnEnum.SUCCESS.getStatus(), CustomRtnEnum.SUCCESS.getMsg());
 	}
 
-	/**
-	 * 更新共有情况
-	 * @param renter 共有情况
-	 * @return dto
-	 */
-	public DTO updateRenter(Renter renter) {
-		log.info("更新共有为-->{}的共有情况,",renter.getId());
+	public DTO updateHouseName(DicHouseName houseName) {
+		log.info("更新共有为-->{}的共有情况,",houseName.getId());
 
-		if (renterMapper.updateById(renter) == 0){
+		if (dicHouseNameMapper.updateById(houseName) == 0){
 			log.error(CustomRtnEnum.ERROR_BAD_SQL.toString());
 			return new SimpleRtnDTO(CustomRtnEnum.ERROR_BAD_SQL.getStatus(),CustomRtnEnum.ERROR_BAD_SQL.getMsg());
 		}
@@ -84,27 +68,21 @@ public class RenterService {
 	}
 
 
-
-	/**
-	 * 获得所有共有情况信息
-	 * @return dto
-	 */
-	public DTO getAllRenterInfo(Page<Renter> page, int asc) {
+	public DTO getAllHouseNameInfo(SimpleCD cd) {
 		log.info("获得所有共有情况信息");
+		Page<DicHouseName> page = new Page<>(cd.getPage(), cd.getLimit());
+		return getAllDataWithPage(page, cd.getAsc(), dicHouseNameMapper);
 
-		return getAllDataWithPage(page,asc,renterMapper);
+	}
+
+	public DTO getAllHouseNameWithoutPage() {
+		log.info("获得所有共有情况信息-- 不分页");
+
+		return getAllDataWithoutPage(dicHouseNameMapper);
+
 	}
 
 
-	/**
-	 * 获得所有共有情况信息
-	 * @return dto
-	 */
-	public DTO getAllRenterWithoutPage() {
-		log.info("获得所有共有情况信息");
-
-		return getAllDataWithoutPage(renterMapper);
-	}
 
 	/**
 	 * 通用的方法

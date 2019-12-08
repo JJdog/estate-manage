@@ -4,10 +4,12 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lanswon.estate.bean.cd.HouseAssetsCD;
+import com.lanswon.estate.bean.po.DmenuVO;
 import com.lanswon.estate.bean.pojo.HouseAssets;
 import com.lanswon.estate.bean.vo.HouseAssetsPageVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -26,4 +28,7 @@ public interface HouseAssetsMapper extends BaseMapper<HouseAssets> {
 	                                            @Param("cd")HouseAssetsCD cd );
 
 	List<String> getAllSerialId();
+
+	List<DmenuVO> getHouseAssetsInfoWithoutPage();
+
 }

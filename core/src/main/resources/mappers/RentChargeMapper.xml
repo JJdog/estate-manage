@@ -17,28 +17,37 @@
 
 
     <select id="generateTail" resultType="java.lang.Double">
-        SELECT datediff(max(t.rent_date), date(#{date})) * (t2.real_rent_charge / 30)
+        SELECT
+                datediff(max(t.rent_date), date(#{date})) * (t2.real_rent_charge / 30)
         FROM money_rent_must t
                  LEFT JOIN deal t1 ON t1.id = t.fk_deal_id
-                 LEFT JOIN house_resource t2 ON t1.fk_house_resource_id = t2.id
+                 LEFT JOIN house_resource t2 ON t1.id = t2.id
         WHERE t1.id = #{id}
           AND t.is_enable = 1
     </select>
+
     <select id="getRentWarnPage" resultType="com.lanswon.estate.bean.vo.SimpleWarnRentVO">
         SELECT t1.deal_serial,
                t1.deal_name,
-               t2.resource_name,
-               t3.name                                     AS renter,
-               concat(t.rent_year, '年', t.rent_month, '月') AS rentMonth,
+
+               group_concat(concat(t5.name, t3.park, t3.build_no, '号楼', t3.build_level, '层', t3.build_room) SEPARATOR
+                            ',') AS resourceName,
+               t4.name                                     AS renter,
+               date_format(date(t.rent_date),'%Y年%m月') AS rentMonth,
                t.must_charge,
                to_days(t.rent_date) - to_days(now())       AS lastDay
         FROM money_rent_must t
                  LEFT JOIN deal t1 ON t.fk_deal_id = t1.id
-                 LEFT JOIN house_resource t2 ON t1.fk_house_resource_id = t2.id
-                 LEFT JOIN renter t3 ON t1.fk_renter_id = t3.id
+                    LEFT JOIN mid_deal_house t2 on t2.fk_deal_id = t1.id
+                 LEFT JOIN house_resource t3 ON t2.fk_house_resource_id = t3.id
+                 LEFT JOIN renter t4 ON t1.fk_renter_id = t4.id
+                 LEFT JOIN dic_agency t5 ON t3.fk_agency_id = t5.id
         WHERE DATE_ADD(now(), INTERVAL #{day} DAY) &gt;= t.rent_date
           AND t.is_enable = 1
+        GROUP BY t.id
+
     </select>
+
     <select id="getRentChargeInfoByDatePage" resultType="com.lanswon.estate.bean.vo.MustMoneyPageVO">
         SELECT * FROM (SELECT
             group_concat(concat(t5.name, t4.park, t4.build_no, '号楼', t4.build_level, '层', t4.build_room) SEPARATOR
