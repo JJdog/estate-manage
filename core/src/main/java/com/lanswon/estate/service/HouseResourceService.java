@@ -44,7 +44,8 @@ public class HouseResourceService {
 		log.info("新增房源信息");
 		/* 创建时间 */
 		houseResource.setCreatedTime(new Date());
-		/* 每平方月租金 */
+		/* 面积 */
+		houseResource.setResourceArea(houseResource.getYzArea() + houseResource.getWzArea());
 		//houseResource.setRentMoneyPerArea(Double.parseDouble(new DecimalFormat("#.##").format(houseResource.getRealRentCharge()/houseResource.getResourceArea())));
 		if (houseResourceMapper.insert(houseResource) == 0){
 			log.error(CustomRtnEnum.ERROR_BAD_SQL.toString());
@@ -59,7 +60,7 @@ public class HouseResourceService {
 	public DTO deleteHouseResource(long hid) {
 
 		log.info("删除id为-->{}的房源信息",hid);
-
+		// todo 租售房源不可删除
 		if (houseResourceMapper.selectById(String.valueOf(hid)) == null){
 			log.error(CustomRtnEnum.RESOURCE_NON_EXIST.toString());
 			return new SimpleRtnDTO(CustomRtnEnum.RESOURCE_NON_EXIST.getStatus(),CustomRtnEnum.RESOURCE_NON_EXIST.getMsg());
@@ -155,6 +156,7 @@ public class HouseResourceService {
 	 * @return dto
 	 */
 	private DTO rtnPageResult(IPage pageList){
+
 		if(pageList.getRecords().isEmpty()){
 			log.error(CustomRtnEnum.ERROR_EMPTY_RESULT.toString());
 			return new DataRtnDTO(CustomRtnEnum.ERROR_EMPTY_RESULT.getStatus(),CustomRtnEnum.ERROR_EMPTY_RESULT.getMsg(),pageList);

@@ -22,8 +22,6 @@ import java.util.Date;
 public class LandAssetsVO {
 
 	private String id;
-	/** 产权名称 */
-	private String assetsName;
 	/** 产权人id */
 	private String fkOwnId;
 
@@ -42,19 +40,18 @@ public class LandAssetsVO {
 	private String landNum;
 	/** 图号 */
 	private String picNum;
-	// todo
 	/** 地类(用途) */
-	private long useTypeCode;
+	private Long fkLandUsageId;
+	private String landUsage;
 
-	private String useType;
+	/** 使用权类型 */
+	private Long fkLandNatureId;
+	private String landNature;
 
 	/** 取得价格 */
 	private double money;
 
-	/** 使用权类型 */
-	private long useRightCode;
 
-	private String useRight;
 	/** 终止时间 */
 	@JsonFormat(pattern = "yyyy年MM月dd日")
 	private Date endTime;

@@ -116,4 +116,17 @@ public class HouseAssetsService {
 
 	}
 
+	public DTO getDetailHouseAssets(Long hid) {
+
+		log.info("获得房产id为:{}的详细信息",hid);
+		HouseAssetsPageVO houseAssets = houseAssetsMapper.getDetailHouseAssets(hid);
+
+		if (houseAssets == null){
+			log.error(CustomRtnEnum.RESOURCE_NON_EXIST.toString());
+			return new DataRtnDTO(CustomRtnEnum.RESOURCE_NON_EXIST.getStatus(),CustomRtnEnum.RESOURCE_NON_EXIST.getMsg(),houseAssets);
+		}
+
+		log.info(CustomRtnEnum.SUCCESS.toString());
+		return new DataRtnDTO(CustomRtnEnum.RESOURCE_NON_EXIST.getStatus(),CustomRtnEnum.RESOURCE_NON_EXIST.getMsg(),houseAssets);
+	}
 }

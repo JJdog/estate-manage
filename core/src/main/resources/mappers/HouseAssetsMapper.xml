@@ -60,10 +60,48 @@
         FROM house_assets t
     </select>
     <select id="getHouseAssetsInfoWithoutPage" resultType="com.lanswon.estate.bean.po.DmenuVO">
-        SELECT  t1.id ,t1.name
+        SELECT  t.id ,t1.name
         FROM house_assets t
             LEFT JOIN dic_house_name t1 ON t.fk_house_name_id = t1.id
         ORDER BY t.created_time DESC
+    </select>
+    <select id="getDetailHouseAssets" resultType="com.lanswon.estate.bean.vo.HouseAssetsPageVO">
+        SELECT t.id,
+               t.house_id,
+               t7.id AS houseNameId,
+               t7.name AS houseName,
+               t.location,
+               t.fk_house_name_id,
+               t.fk_own_id AS fkOwnerId,
+               t3.name AS owner,
+               t.fk_house_share_id AS houseShareId,
+               t1.name AS houseShare,
+               t.fk_agency_id AS agencyId,
+               t2.name AS agency,
+               t.fk_house_nature AS houseNatureId,
+               t6.name AS houseNature,
+               t.fk_house_usage AS houseUsageId,
+               t5.name AS houseUsage,
+               t.total_level,
+               t.build_area,
+               t.real_area,
+               t.other_area,
+               t.yz_area AS yzArea,
+               t.wz_area AS wzArea,
+               t.fk_land_assets_id AS landAssetsId,
+               t4.land_num,
+               t.register_time,
+               t.remark
+        FROM house_assets t
+                 LEFT JOIN dic_house_share t1 ON t.fk_house_share_id = t1.id
+                 LEFT JOIN dic_agency t2 ON t.fk_agency_id = t2.id
+                 LEFT JOIN dic_assets_co t3 ON t.fk_own_id = t3.id
+                 LEFT JOIN land_assets t4 ON t.fk_land_assets_id = t4.id
+                 LEFT JOIN dic_house_usage t5 ON t.fk_house_usage = t5.id
+                 LEFT JOIN dic_house_nature t6 ON t.fk_house_nature = t6.id
+                 LEFT JOIN dic_house_name t7 ON t.fk_house_name_id = t7.id
+
+        WHERE t.id = #{hid}
     </select>
 </mapper>
     

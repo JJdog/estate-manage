@@ -27,19 +27,20 @@ import javax.validation.constraints.NotNull;
 public class HouseResource extends BasePojo {
 
 
-	@ApiModelProperty(value = "房产id")
+	@ApiModelProperty(value = "房产id",required = true)
+	@NotNull(message = "房产不可为空")
 	private long fkHouseAssetsId;
 
 	@NotNull(message = "管理单位不可为空")
-	@ApiModelProperty(value = "管理单位id")
+	@ApiModelProperty(value = "管理单位id",required = true)
 	private long fkAgencyId;
 
 	@NotNull(message = "房源类型不可为空")
-	@ApiModelProperty(value = "房源类型id")
+	@ApiModelProperty(value = "房源类型id",required = true)
 	private long fkResourceTypeId;
 
 	@NotBlank(message = "园区信息不可为空")
-	@ApiModelProperty(value = "园区")
+	@ApiModelProperty(value = "园区",required = true)
 	private String park;
 
 	@ApiModelProperty(value = "楼栋号")
@@ -51,26 +52,21 @@ public class HouseResource extends BasePojo {
 	@ApiModelProperty(value = "房间号")
 	private String buildRoom;
 
-	@NotNull(message = "房源面积不可为空")
 	@ApiModelProperty(value = "房源面积", hidden = true)
-	private double resourceArea;
+	private Double resourceArea;
 
 	@ApiModelProperty(value = "房源有证面积")
-	private double yzArea;
+	private Double yzArea;
 
 	@ApiModelProperty(value = "房源无证面积")
-	private double wzArea;
-
+	private Double wzArea;
 
 	@ApiModelProperty(value = "历史租金")
-	private double originRentCharge;
+	private Double originRentCharge;
 
 	@NotNull(message = "房源指导价不可为空")
 	@ApiModelProperty(value = "指导价")
-	private double guideRentCharge;
-
-	@ApiModelProperty(value = "每平方米月租金", hidden = true)
-	private double rentMoneyPerArea;
+	private Double guideRentCharge;
 
 	@ApiModelProperty(value = "出租状态")
 	private int rentStatus;

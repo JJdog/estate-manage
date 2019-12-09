@@ -51,6 +51,12 @@ public class HouseAssetsController {
 	return houseAssetsService.getHouseAssetsPage(cd);
 	}
 
+	@GetMapping(value = "/{hid}")
+	@ApiOperation(value = "获得房产相信信息")
+	public DTO getDetailHouseAssets(@PathVariable(value = "hid") Long hid){
+		return houseAssetsService.getDetailHouseAssets(hid);
+	}
+
 	@GetMapping("/menu")
 	@ApiOperation(value = "房屋资产信息-不分页")
 	public DTO getHouseAssetsInfoWithoutPage(){

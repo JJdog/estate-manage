@@ -1,9 +1,7 @@
 package com.lanswon.estate.service;
 
 
-import cn.afterturn.easypoi.excel.annotation.Excel;
 import com.lanswon.commons.core.poi.FileIOUtil;
-import com.lanswon.commons.core.time.DateFormatEnum;
 import com.lanswon.commons.core.time.DateTimeUtil;
 import com.lanswon.commons.web.dto.DTO;
 import com.lanswon.commons.web.rtn.CustomRtnEnum;
@@ -25,8 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
-import java.time.LocalDate;
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -49,6 +46,14 @@ public class IoService {
 	@Resource
 	private DicAssetsCoMapper dicAssetsCoMapper;
 	@Resource
+	private DicLandUsageMapper dicLandUsageMapper;
+	@Resource
+	private DicLandNatureMapper dicLandNatureMapper;
+	@Resource
+	private DicHouseUsageMapper dicHouseUsageMapper;
+	@Resource
+	private DicHouseNatureMapper dicHouseNatureMapper;
+	@Resource
 	private DicHouseNameMapper dicHouseNameMapper;
 	@Resource
 	private LandAssetsMapper landAssetsMapper;
@@ -66,26 +71,39 @@ public class IoService {
 	private List<String> agencyNameAndId;
 	/** 房产名称-id对应关系 */
 	private List<String> houseAssetsNameAndId;
+	/** 房产用途-id对应关系 */
+	private List<String> houseUsageAndId;
+	/** 房产性质-id对应关系 */
+	private List<String> houseNatureAndId;
 	/** 产权所有人-id对应关系 */
 	private List<String> ownerNameAndId;
 	/** 土地证号-id对应关系 */
 	private List<String> landNoAndId;
+	/** 土地用途-id对应关系 */
+	private List<String> landUsageAndId;
+	/** 土地性质-id对应关系 */
+	private List<String> landNatureAndId;
+	/** 房产名称-id对应关系 */
 	private List<String> houseNameAndId;
-
 
 	private void init(){
 		log.info("初始化转换数据");
 		agencyNameAndId = agencyMapper.getAllNameAndId();
 		houseAssetsNameAndId = houseAssetsMapper.getAllSerialId();
+		houseUsageAndId = dicHouseUsageMapper.getAllUsageAndId();
+		houseNatureAndId = dicHouseNatureMapper.getAllNatureAndId();
 		ownerNameAndId = dicAssetsCoMapper.getAllNameAndId();
 		houseNameAndId = dicHouseNameMapper.getAllNameAndId();
 		landNoAndId = landAssetsMapper.getAllLandNoAndId();
+		landUsageAndId = dicLandUsageMapper.getAllUsageAndId();
+		landNatureAndId = dicLandNatureMapper.getAllNatureAndId();
 	}
 
 
 	/** In 地产*/
 	@Transactional(rollbackFor = Exception.class)
 	public DTO importLandAssets(MultipartFile file) {
+		log.info("初始化转换信息");
 		init();
 
 		/* 写入数据库对象 */
@@ -97,7 +115,9 @@ public class IoService {
 
 		try {
 			// 获得Excel数据
+			@Valid
 			List<PoiLandAssetsPO> landAssetsList = FileIOUtil.importFile(file.getInputStream(), 0, 1, PoiLandAssetsPO.class);
+			log.info("获得Excel数据,总数为:{}",landAssetsList.size());
 
 			// 导入总条数
 			poiResultVO.setTotalRow(landAssetsList.size());
@@ -105,6 +125,8 @@ public class IoService {
 
 			// 转码后放到新容器
 			landAssetsList.forEach(poiLandAssets -> {
+
+
 				// 转码
 				PoiLandAssetsPO landAssetsPO = convertLandAssets2Database(poiLandAssets);
 
@@ -247,10 +269,20 @@ public class IoService {
 
 	/** 土产转码 */
 	private PoiLandAssetsPO convertLandAssets2Database(PoiLandAssetsPO poiLandAssetsPO){
+		log.info(poiLandAssetsPO.getLandNo(),"{}转码");
 		// 产权人
 		poiLandAssetsPO.setFkOwnId(ownerName2Id(poiLandAssetsPO.getOwner()));
 		// 管理单位
 		poiLandAssetsPO.setFkAgencyId(agencyName2Id(poiLandAssetsPO.getAgencyName()));
+		if (poiLandAssetsPO.getLandUsage() != null){
+			// 土产用途
+			poiLandAssetsPO.setFkLandUsageId(landUsage2Id(poiLandAssetsPO.getLandUsage()));
+		}
+		if (poiLandAssetsPO.getLandNature() != null){
+			// 土产类型
+			poiLandAssetsPO.setFkLandNatureId(landNature2Id(poiLandAssetsPO.getLandNature()));
+		}
+
 		return poiLandAssetsPO;
 	}
 
@@ -268,6 +300,10 @@ public class IoService {
 		poiHouseAssetsPO.setFkLandAssetsId(landNo2Id(poiHouseAssetsPO.getLandNo()));
 		// 房产名称
 		poiHouseAssetsPO.setFkHouseNameId(houseName2Id(poiHouseAssetsPO.getAssetsName()));
+		// 房产用途
+		poiHouseAssetsPO.setFkHouseUsage(houseUsage2Id(poiHouseAssetsPO.getHouseUsage()));
+		// 房产性质
+		poiHouseAssetsPO.setFkHouseNature(houseNature2Id(poiHouseAssetsPO.getHouseNature()));
 
 		return poiHouseAssetsPO;
 	}
@@ -294,8 +330,6 @@ public class IoService {
 	/*============名称转id==========================*/
 
 
-
-
 	/** 管理单位转码 */
 	private Long agencyName2Id(String name){
 		for (String s : agencyNameAndId){
@@ -307,15 +341,6 @@ public class IoService {
 		return null;
 	}
 
-	/** 房产转码 */
-	private Long houseAssetsSerialName2Id(String name){
-		for (String s: houseAssetsNameAndId){
-			if (s.startsWith(name)){
-				return Long.valueOf(StringUtils.substringAfter(s, "$"));
-			}
-		}
-		return null;
-	}
 
 	/** 产权所有人转码 */
 	private Long ownerName2Id(String name){
@@ -337,6 +362,26 @@ public class IoService {
 		return null;
 	}
 
+	/** 土地证号转码转码 */
+	private Long landUsage2Id(String name){
+		for (String s : landUsageAndId){
+			if (s.startsWith(name)){
+				return Long.valueOf(StringUtils.substringAfter(s, "$"));
+			}
+		}
+		return null;
+	}
+
+	/** 土地证号转码转码 */
+	private Long landNature2Id(String name){
+		for (String s : landNatureAndId){
+			if (s.startsWith(name)){
+				return Long.valueOf(StringUtils.substringAfter(s, "$"));
+			}
+		}
+		return null;
+	}
+
 
 	/** 房产名称转码 */
 	private Long houseName2Id(String name){
@@ -349,7 +394,35 @@ public class IoService {
 	}
 
 
+	/** 房产证号转码 */
+	private Long houseAssetsSerialName2Id(String name){
+		for (String s: houseAssetsNameAndId){
+			if (s.startsWith(name)){
+				return Long.valueOf(StringUtils.substringAfter(s, "$"));
+			}
+		}
+		return null;
+	}
 
+	/** 房产用途转码 */
+	private Long houseUsage2Id(String name){
+		for (String s : houseUsageAndId){
+			if (s.startsWith(name)){
+				return Long.valueOf(StringUtils.substringAfter(s, "$"));
+			}
+		}
+		return null;
+	}
+
+	/** 房产性质转码 */
+	private Long houseNature2Id(String name){
+		for (String s : houseNatureAndId){
+			if (s.startsWith(name)){
+				return Long.valueOf(StringUtils.substringAfter(s, "$"));
+			}
+		}
+		return null;
+	}
 
 
 }

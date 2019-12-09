@@ -21,6 +21,8 @@ public class PoiLandAssetsPO extends BasePojo {
 
 	/** 房产名称 */
 	@Excel(name = "土地证号*")
+	@NotNull(message = "土地证号不可为空")
+	@NotBlank(message = "土地证号不可为空")
 	private String landNo;
 
 	@Excel(name = "产权人名称*")
@@ -50,7 +52,7 @@ public class PoiLandAssetsPO extends BasePojo {
 	@Excel(name = "图号")
 	private String picNum;
 
-	@Excel(name = "地类(通途)")
+	@Excel(name = "地类(用途)")
 	@TableField(exist = false)
 	private String landUsage;
 	private Long fkLandUsageId;
@@ -61,10 +63,11 @@ public class PoiLandAssetsPO extends BasePojo {
 	private Long fkLandNatureId;
 
 	@Excel(name = "有证面积*")
-	private  double yzArea;
+	@NotNull(message = "有证面积不可为空")
+	private  Double yzArea;
 
 	@Excel(name = "无证面积*")
-	private  double wzArea;
+	private  Double wzArea;
 
 	@Excel(name = "使用权面积")
 	private Double assetsArea;

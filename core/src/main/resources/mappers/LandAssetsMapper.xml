@@ -5,7 +5,6 @@
     <select id="getLandAssetsPageList" resultType="com.lanswon.estate.bean.vo.LandAssetsVO">
         SELECT
         t.id,
-        t.assets_name,
         t.fk_own_id ,
         t.land_no,
         t1.name AS owner,
@@ -14,11 +13,11 @@
         t.assets_location,
         t.land_num,
         t.pic_num,
-        t.fk_land_usage_id AS useTypeCode,
-        t2.name AS useType,
+        t.fk_land_usage_id ,
+        t2.name AS landUsage,
         t.money,
-        t.fk_land_nature_id AS useRightCode,
-        t3.name AS useRight,
+        t.fk_land_nature_id,
+        t3.name AS landNature,
         t.end_time,
         t.assets_area,
         t.self_area,

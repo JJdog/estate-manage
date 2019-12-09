@@ -31,4 +31,5 @@ public interface HouseAssetsMapper extends BaseMapper<HouseAssets> {
 
 	List<DmenuVO> getHouseAssetsInfoWithoutPage();
 
+	HouseAssetsPageVO getDetailHouseAssets(@Param("hid") Long hid);
 }

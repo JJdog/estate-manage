@@ -25,39 +25,63 @@ import java.util.Date;
 @ApiModel(value = "土地资产POJO")
 public class LandAssets extends BasePojo {
 
-  /** 产权拥有人 */
-  private long fkOwnId;
-  /** 坐落 */
-  private String assetsLocation;
+	/**
+	 * 产权拥有人
+	 */
+	private long fkOwnId;
+	/**
+	 * 坐落
+	 */
+	private String assetsLocation;
 
-  private String landNo;
+	private String landNo;
 
-  private Long fkAgencyId;
+	private Long fkAgencyId;
 
-  /** 地号 */
-  private String landNum;
-  /** 图号 */
-  private String picNum;
-  /** 地类(用途) */
-  private long useType;
-  /** 取得价格 */
-  private double money;
-  /** 使用权类型 */
-  private long useRight;
-  /** 终止时间 */
-  @JsonFormat(pattern = "yyyy年MM月dd日 HH:mm:ss:ms")
-  private Date endTime;
-  /** 使用权面积 */
-  private double assetsArea;
-  /** 独有面积 */
-  private double selfArea;
-  /** 公摊面积 */
-  private double shareArea;
+	/**
+	 * 地号
+	 */
+	private String landNum;
+	/**
+	 * 图号
+	 */
+	private String picNum;
+	/**
+	 * 地类(用途)
+	 */
+	private Long fkLandUsageId;
+	/**
+	 * 使用权类型
+	 */
+	private long fkLandNatureId;
+	/**
+	 * 取得价格
+	 */
+	private double money;
+	/**
+	 * 终止时间
+	 */
+	@JsonFormat(pattern = "yyyy年MM月dd日 HH:mm:ss:ms")
+	private Date endTime;
+	/**
+	 * 使用权面积
+	 */
+	private double assetsArea;
+	/**
+	 * 独有面积
+	 */
+	private double selfArea;
+	/**
+	 * 公摊面积
+	 */
+	private double shareArea;
 
 	private double yzArea;
 
 	private double wzArea;
-  /** 备注 */
-  private String remark;
+	/**
+	 * 备注
+	 */
+	private String remark;
 
 }

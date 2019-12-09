@@ -1,7 +1,6 @@
 package com.lanswon.estate.rest;
 
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lanswon.commons.web.dto.DTO;
 import com.lanswon.estate.bean.cd.ExportTransFlowCD;
 import com.lanswon.estate.service.IoService;
@@ -14,7 +13,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.Date;
 
 /**
  * 导入导出
@@ -46,10 +44,10 @@ public class IoRest {
 		return ioService.importHouseResource(file);
 	}
 
-	//@GetMapping(value = "houseresource")
-	//public void exportHouseResource(HttpServletResponse response){
-	//
-	//}
+	@PostMapping(value = "/deal/in")
+	public DTO importDeal(@RequestParam(value = "file")MultipartFile file){
+		return null;
+	}
 
 	@PostMapping(value = "/flow/in")
 	public DTO importTransFlow(@RequestParam(value = "file")MultipartFile file){
