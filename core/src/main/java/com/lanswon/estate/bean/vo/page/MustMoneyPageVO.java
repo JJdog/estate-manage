@@ -1,12 +1,18 @@
-package com.lanswon.estate.bean.vo;
+package com.lanswon.estate.bean.vo.page;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.util.Date;
 
+/**
+ * 应收款
+ *
+ * @author jaswine
+ */
 @Data
 public class MustMoneyPageVO {
+
 	/** 房源地址 */
 	private String houseLocation;
 
@@ -27,5 +33,8 @@ public class MustMoneyPageVO {
 	private String reason;
 
 	/** 应收金额 */
-	private double money;
+	private Double money;
+
+	/** 实收金额 */
+	private Double receivedMoney;
 }

@@ -7,7 +7,7 @@ import com.lanswon.estate.bean.cd.HouseResourceCD;
 import com.lanswon.estate.bean.pojo.HouseResource;
 import com.lanswon.estate.bean.vo.DetailHouseResourceVO;
 import com.lanswon.estate.bean.vo.HouseResourceMenuVO;
-import com.lanswon.estate.bean.vo.HouseResourcePageVO;
+import com.lanswon.estate.bean.vo.page.HouseResourcePageVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -30,28 +30,22 @@ public interface HouseResourceMapper extends BaseMapper<HouseResource> {
 
 	DetailHouseResourceVO getHouseResourceDetailInfo(long hid);
 
-	@Select("SELECT  t.real_rent_charge FROM house_resource t WHERE t.id = #{id}")
-	double getHouseMonthRentByResourceId(long id);
+	/** 房源已出租 */
+	@Update("UPDATE house_resource t SET t.rent_status = #{rent}  WHERE t.id = #{id}")
+	boolean updateResource2HasRented(@Param("id") long id,
+	                                 @Param("rent") int rent);
+	/** 房源未出租 */
+	@Update("UPDATE house_resource t SET t.rent_status = #{rent} WHERE t.id = #{id} ")
+	boolean updateResource2FreeRent(@Param("id") long id,
+	                                @Param("rent") int rent);
 
-	@Update("UPDATE house_resource t SET t.rent_status = 1 WHERE t.id = #{id}")
-	boolean updateResource2HasRented(long id);
-
-	@Update("UPDATE house_resource t SET t.rent_status = 0 WHERE t.id = #{id} ")
-	boolean updateResource2FreeRent(long id);
-
+	/** 未出租的房源 */
 	List<HouseResourceMenuVO> getNoRentHouseResource();
 
-	@Select("SELECT count(id) FROM house_resource WHERE fk_agency_id = #{id} ")
-	int getTotalResourceNumByAgencyId(Long id);
 
-	@Select("SELECT sum(resource_area) FROM house_resource WHERE fk_agency_id = #{id} ")
-	double getTotalResourceAreaByAgencyId(Long id);
-
-	@Select("SELECT sum(resource_yz_area) FROM house_resource WHERE fk_agency_id = #{id} ")
-	double getTotalResourceYzAreaByAgencyId(Long id);
-
-	@Select("SELECT sum(resource_wz_area) FROM house_resource WHERE fk_agency_id = #{id} ")
-	double getTotalResourceWzAreaByAgencyId(Long id);
 
 	List<DetailHouseResourceVO> getHouseResourceDetailByDealId(long id);
+
+	@Select("SELECT resource_area FROM house_resource t WHERE t.id = #{id} ")
+	Double getHouseResourceAreaById(Long id);
 }

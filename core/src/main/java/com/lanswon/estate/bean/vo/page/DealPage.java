@@ -1,8 +1,11 @@
-package com.lanswon.estate.bean.vo;
+package com.lanswon.estate.bean.vo.page;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lanswon.estate.bean.pojo.RentCharge;
+import com.lanswon.estate.bean.vo.DetailHouseResourceVO;
+import com.lanswon.estate.bean.vo.MustMoneyVO;
+import com.lanswon.estate.bean.vo.TransFlowVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -21,22 +24,29 @@ import java.util.List;
 public class DealPage {
 
 
-	/*=========合同==================*/
-
 	private long id;
 
 	/** 合同编号 */
 	private String dealSerial;
 
-	/** 出租人 */
-	private String lessor;
+	/** 合同类型 */
+	private int dealTypeCode;
+	private String dealType;
+
+	/** 支付方式 */
+	private int payTypeCode;
+	private String payType;
+
+	/** 地址 */
+	private String location;
 
 	/** 承租人 */
 	private long renterId;
 	private String renter;
 
-	/** 地址 */
-	private String location;
+	/** 出租人 */
+	private Long lessorId;
+	private String lessor;
 
 	/** 租赁时长 */
 	private int rentMonth;
@@ -48,13 +58,10 @@ public class DealPage {
 	private int isNewRentCode;
 	private String isNewRent;
 
-	/** 合同类型 */
-	private int dealTypeCode;
-	private String dealType;
 
-	/** 支付方式 */
-	private int payTypeCode;
-	private String payType;
+	/** 是否有优惠 */
+	private int isHaveDiscountCode;
+	private String isHaveDiscount;
 
 	/** 合同存在状态 */
 	private int dealExistStatusCode;
@@ -75,7 +82,7 @@ public class DealPage {
 
 
 
-	/** 房产信息 */
+	/** 房源信息 */
 	List<DetailHouseResourceVO> houseResourceDetail;
 
 	/** 应收资金 */

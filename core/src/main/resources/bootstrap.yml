@@ -10,7 +10,7 @@ server:
 ---
 spring:
   profiles:
-    active: c1
+    active: c2
 
 ---
 # nacos 配置
@@ -19,9 +19,10 @@ spring:
     nacos:
       config:
         # 方便和服务发现分开,更能够体现性能
-        server-addr: 192.168.44.78:8848
+#        server-addr: 192.168.44.78:8848
+        server-addr: 192.168.2.7:8848
         file-extension: yaml
-        refreshable-dataids: ${spring.application.name}-c1.yaml
+        refreshable-dataids: ${spring.application.name}-c2.yaml
 
 ---
 spring:

@@ -13,10 +13,7 @@ import java.util.List;
 @Data
 public class ReportCD {
 
-	private Date startDate;
+	private Date date;
 
-	private Date endStart;
-
-	private List<Long> agency;
 
 }

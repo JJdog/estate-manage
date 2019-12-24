@@ -12,13 +12,12 @@ import com.lanswon.estate.bean.cd.HouseResourceCD;
 import com.lanswon.estate.bean.pojo.HouseResource;
 import com.lanswon.estate.bean.vo.DetailHouseResourceVO;
 import com.lanswon.estate.bean.vo.HouseResourceMenuVO;
-import com.lanswon.estate.bean.vo.HouseResourcePageVO;
+import com.lanswon.estate.bean.vo.page.HouseResourcePageVO;
 import com.lanswon.estate.mapper.HouseResourceMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 

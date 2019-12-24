@@ -1,0 +1,90 @@
+@startuml
+alt 新增合同
+autonumber
+用户 -> filter: 新增合同
+filter -> filter: 校验
+note right:1.房源是否被租赁\n2.租赁月份是否能被交租类型整除
+filter --> 用户: 校验不通过
+filter -> service: 校验通过
+service -> service: 事务
+note right:1.插入合同\n2.绑定合同和房源\n3.修改房源为已租赁\n4.插入应收保证金\n5.计算&插入应收租金
+
+service --> 用户: 事务失败
+
+
+service --> repo: 插入数据
+end
+
+alt 删除合同
+
+autonumber
+用户 -> filter: 新增合同
+filter -> filter: 校验
+note right:1.房源是否被租赁\n2.租赁月份是否能被交租类型整除
+filter --> 用户: 校验不通过
+filter -> service: 校验通过
+service -> service: 事务
+note right:1.插入合同\n2.绑定合同和房源\n3.修改房源为已租赁\n4.插入应收保证金\n5.计算&插入应收租金
+
+service --> 用户: 事务失败
+
+
+service --> repo: 插入数据
+
+end
+
+alt 修改合同
+
+autonumber
+用户 -> filter: 修改合同
+filter -> filter: 校验
+note right:1.房源是否被租赁\n2.租赁月份是否能被交租类型整除
+filter --> 用户: 校验不通过
+filter -> service: 校验通过
+service -> service: 事务
+note right:0.删除原合同绑定房源,应收保证金,应收租金\n1.更新合同\n2.绑定合同和新房源\n3.修改房源为已租赁\n4.插入应收保证金\n5.计算&插入应收租金
+
+service --> 用户: 事务失败
+
+
+service --> repo: 插入数据
+
+end
+
+alt 审核合同
+
+autonumber
+用户 -> filter: 新增合同
+filter -> filter: 校验
+note right:1.房源是否被租赁\n2.租赁月份是否能被交租类型整除
+filter --> 用户: 校验不通过
+filter -> service: 校验通过
+service -> service: 事务
+note right:1.插入合同\n2.绑定合同和房源\n3.修改房源为已租赁\n4.插入应收保证金\n5.计算&插入应收租金
+
+service --> 用户: 事务失败
+
+
+service --> repo: 插入数据
+
+end
+
+alt 提前结束合同
+
+autonumber
+用户 -> filter: 新增合同
+filter -> filter: 校验
+note right:1.房源是否被租赁\n2.租赁月份是否能被交租类型整除
+filter --> 用户: 校验不通过
+filter -> service: 校验通过
+service -> service: 事务
+note right:1.插入合同\n2.绑定合同和房源\n3.修改房源为已租赁\n4.插入应收保证金\n5.计算&插入应收租金
+
+service --> 用户: 事务失败
+
+
+service --> repo: 插入数据
+
+end
+
+@enduml

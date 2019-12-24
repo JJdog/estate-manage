@@ -1,4 +1,4 @@
-package com.lanswon.estate.bean.vo;
+package com.lanswon.estate.bean.vo.page;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -79,6 +79,9 @@ public class HouseAssetsPageVO {
 
 	/** 地号 */
 	private String landNum;
+
+	/** 土地证号 */
+	private String landNo;
 
 
 	// todo

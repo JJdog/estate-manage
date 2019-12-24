@@ -1,4 +1,4 @@
-package com.lanswon.estate.bean.vo;
+package com.lanswon.estate.bean.vo.page;
 
 
 import lombok.Data;

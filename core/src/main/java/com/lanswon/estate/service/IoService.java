@@ -1,6 +1,8 @@
 package com.lanswon.estate.service;
 
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.read.builder.ExcelReaderBuilder;
 import com.lanswon.commons.core.poi.FileIOUtil;
 import com.lanswon.commons.core.time.DateTimeUtil;
 import com.lanswon.commons.web.dto.DTO;
@@ -11,6 +13,8 @@ import com.lanswon.estate.bean.po.PoiHouseResourcePO;
 import com.lanswon.estate.bean.po.PoiLandAssetsPO;
 import com.lanswon.estate.bean.po.PoiTransFlow;
 import com.lanswon.estate.bean.vo.PoiResultVO;
+import com.lanswon.estate.listener.HouseAssetsListener;
+import com.lanswon.estate.listener.HouseResourceListener;
 import com.lanswon.estate.mapper.*;
 import com.lanswon.estate.mapper.poi.PoiHouseAssetsMapper;
 import com.lanswon.estate.mapper.poi.PoiHouseResourceMapper;
@@ -24,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -53,6 +58,8 @@ public class IoService {
 	private DicHouseUsageMapper dicHouseUsageMapper;
 	@Resource
 	private DicHouseNatureMapper dicHouseNatureMapper;
+	@Resource
+	private DicResourceTypeMapper dicResourceTypeMapper;
 	@Resource
 	private DicHouseNameMapper dicHouseNameMapper;
 	@Resource
@@ -85,6 +92,8 @@ public class IoService {
 	private List<String> landNatureAndId;
 	/** 房产名称-id对应关系 */
 	private List<String> houseNameAndId;
+	/** 房源类型-id对应关系 */
+	private List<String> resourceTypeAndId;
 
 	private void init(){
 		log.info("初始化转换数据");
@@ -97,6 +106,7 @@ public class IoService {
 		landNoAndId = landAssetsMapper.getAllLandNoAndId();
 		landUsageAndId = dicLandUsageMapper.getAllUsageAndId();
 		landNatureAndId = dicLandNatureMapper.getAllNatureAndId();
+		resourceTypeAndId = dicResourceTypeMapper.getAllResourceTypeAndId();
 	}
 
 
@@ -151,6 +161,10 @@ public class IoService {
 				poiLandAssetsMapper.insert(poiLandAssets);
 			});
 		} catch (Exception e) {
+			// 错误信息
+			poiResultVO.setErrorRow(poiResultVO.getTotalRow());
+			poiResultVO.setSuccessRow(poiResultVO.getTotalRow() - poiResultVO.getErrorRow());
+
 			e.printStackTrace();
 		}
 
@@ -160,45 +174,15 @@ public class IoService {
 	/** In房产 */
 	@Transactional(rollbackFor = Exception.class)
 	public DTO importHouseAssets(MultipartFile file) {
+		log.info("初始化转码信息");
 		init();
-
-		List<PoiHouseAssetsPO> dbHouseAssets = new ArrayList<>();
-
 		/* 汇总数据 */
 		PoiResultVO poiResultVO = new PoiResultVO();
 		poiResultVO.setPoiName("导入房屋产证信息"+ DateTimeUtil.getDateTime());
 
 		try {
-
-			// 获得房产
-			List<PoiHouseAssetsPO> houseAssetsList = FileIOUtil.importFile(file.getInputStream(), 0, 1, PoiHouseAssetsPO.class);
-
-			// 导入总条数
-			poiResultVO.setTotalRow(houseAssetsList.size());
-			List<String> errorList = new ArrayList<>();
-
-
-			houseAssetsList.forEach(poiHouseAssetsPO -> {
-
-				PoiHouseAssetsPO houseAssetsPO = convertHouseAssets2Database(poiHouseAssetsPO);
-
-				// 转码失败
-				if (houseAssetsPO.getFkAgencyId() == null || houseAssetsPO.getFkOwnId() == null || houseAssetsPO.getFkLandAssetsId() == null){
-					poiResultVO.setErrorRow(poiResultVO.getErrorRow() + 1);
-					errorList.add(houseAssetsPO.getHouseId());
-					return;
-				}
-
-				dbHouseAssets.add(houseAssetsPO);
-
-			});
-
-			// 错误信息
-			poiResultVO.setErrorRows(errorList);
-			poiResultVO.setSuccessRow(poiResultVO.getTotalRow() - poiResultVO.getErrorRow());
-
-			dbHouseAssets.forEach(poiHouseAssetsPO -> poiHouseAssetsMapper.insert(poiHouseAssetsPO));
-		} catch (Exception e) {
+			EasyExcel.read(file.getInputStream(), PoiHouseAssetsPO.class, new HouseAssetsListener(this,this.poiHouseAssetsMapper)).sheet().doRead();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(),CustomRtnEnum.SUCCESS.getMsg(),poiResultVO);
@@ -207,34 +191,21 @@ public class IoService {
 
 
 	/** In房源 */
-	public DTO importHouseResource(MultipartFile file) {
-
+	@Transactional(rollbackFor = Exception.class)
+	public DTO importHouseResource(MultipartFile file) throws IOException {
+		log.info("初始化转换信息");
 		init();
 
 		/* 写入数据库对象 */
-		List<PoiHouseResourcePO> dbHouseResource = new ArrayList<>();
+		List<PoiHouseResourcePO> dbResource = new ArrayList<>();
 
+		/* 汇总数据 */
 		PoiResultVO poiResultVO = new PoiResultVO();
+		poiResultVO.setPoiName("导入房源信息"+ DateTimeUtil.getDateTime());
 
-		try {
-			// 获得Excel数据
-			List<PoiHouseResourcePO> houseResources = FileIOUtil.importFile(file.getInputStream(), 0, 1, PoiHouseResourcePO.class);
+		// 获得Excel数据
+		EasyExcel.read(file.getInputStream(), PoiHouseResourcePO.class, new HouseResourceListener(this,this.poiHouseResourceMapper)).sheet().doRead();
 
-			poiResultVO.setTotalRow(houseResources.size());
-
-			// 转码后放到新容器
-			houseResources.forEach(poiHouseResourcePO ->{
-				if (!dbHouseResource.add(convertHouseResource2Database(poiHouseResourcePO))){
-					log.error(poiHouseResourcePO.getHouseSerial()+"失败");
-					poiResultVO.getErrorRows().add(poiHouseResourcePO.getHouseSerial());
-				}
-			});
-
-			// 遍历容器插入
-			dbHouseResource.forEach(poiHouseResourcePO -> poiHouseResourceMapper.insert(poiHouseResourcePO));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 
 		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(),CustomRtnEnum.SUCCESS.getMsg(),poiResultVO);
 	}
@@ -286,12 +257,8 @@ public class IoService {
 		return poiLandAssetsPO;
 	}
 
-	/**
-	 * 房产转码
-	 * @param poiHouseAssetsPO 房产对象
-	 * @return 转码后对象
-	 */
-	private PoiHouseAssetsPO convertHouseAssets2Database(PoiHouseAssetsPO poiHouseAssetsPO){
+	/** 房产转码 */
+	public PoiHouseAssetsPO convertHouseAssets2Database(PoiHouseAssetsPO poiHouseAssetsPO){
 		// 管理单位
 		poiHouseAssetsPO.setFkAgencyId(agencyName2Id(poiHouseAssetsPO.getAgencyName()));
 		// 产权拥有者
@@ -300,10 +267,16 @@ public class IoService {
 		poiHouseAssetsPO.setFkLandAssetsId(landNo2Id(poiHouseAssetsPO.getLandNo()));
 		// 房产名称
 		poiHouseAssetsPO.setFkHouseNameId(houseName2Id(poiHouseAssetsPO.getAssetsName()));
-		// 房产用途
-		poiHouseAssetsPO.setFkHouseUsage(houseUsage2Id(poiHouseAssetsPO.getHouseUsage()));
-		// 房产性质
-		poiHouseAssetsPO.setFkHouseNature(houseNature2Id(poiHouseAssetsPO.getHouseNature()));
+
+		if (poiHouseAssetsPO.getHouseUsage() != null){
+			// 房产用途
+			poiHouseAssetsPO.setFkHouseUsage(houseUsage2Id(poiHouseAssetsPO.getHouseUsage()));
+		}
+
+		if (poiHouseAssetsPO.getHouseNature() != null){
+			// 房产性质
+			poiHouseAssetsPO.setFkHouseNature(houseNature2Id(poiHouseAssetsPO.getHouseNature()));
+		}
 
 		return poiHouseAssetsPO;
 	}
@@ -314,12 +287,18 @@ public class IoService {
 	 * @param poiHouseResourcePO 房源对象
 	 * @return 转码后对象
 	 */
-	private PoiHouseResourcePO convertHouseResource2Database(PoiHouseResourcePO poiHouseResourcePO){
+	public PoiHouseResourcePO convertHouseResource2Database(PoiHouseResourcePO poiHouseResourcePO){
 
-		// 管理机构转码
+		// 管理机构-id转码
 		poiHouseResourcePO.setFkAgencyId(agencyName2Id(poiHouseResourcePO.getAgencyName()));
-		// 房产转码
+		// 房产证-id转码
 		poiHouseResourcePO.setFkHouseAssetsId(houseAssetsSerialName2Id(poiHouseResourcePO.getHouseSerial()));
+
+		if (poiHouseResourcePO.getSellStatus() == 1){
+			// 房源类型-id转码
+			poiHouseResourcePO.setFkResourceTypeId(resourceType2Id(poiHouseResourcePO.getResourceType()));
+		}
+
 		return poiHouseResourcePO;
 	}
 
@@ -424,5 +403,14 @@ public class IoService {
 		return null;
 	}
 
+	/** 房源类型转码 */
+	private Long resourceType2Id(String name){
+		for (String s : resourceTypeAndId){
+			if (s.startsWith(name)){
+				return Long.valueOf(StringUtils.substringAfter(s, "$"));
+			}
+		}
+		return null;
+	}
 
 }

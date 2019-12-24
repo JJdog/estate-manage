@@ -19,4 +19,7 @@ import java.util.List;
 public interface DicResourceTypeMapper extends BaseMapper<DicResourceType> {
 
 
+	@Select("SELECT concat(t.name,'$',t.id) FROM dic_resource_type t")
+	List<String> getAllResourceTypeAndId();
+
 }

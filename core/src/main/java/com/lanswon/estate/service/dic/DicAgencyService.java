@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -28,12 +29,6 @@ public class DicAgencyService {
 	@Resource
 	private DicAgencyMapper dicAgencyMapper;
 
-
-	/**
-	 * 新增共有类型情况
-	 * @param co 共有类型
-	 * @return dto
-	 */
 	public DTO insertAgency(DicAgency co) {
 		log.info("新增共有类型数据");
 		if (dicAgencyMapper.insert(co) == 0){
@@ -45,12 +40,6 @@ public class DicAgencyService {
 		return new SimpleRtnDTO(CustomRtnEnum.SUCCESS.getStatus(), CustomRtnEnum.SUCCESS.getMsg());
 
 	}
-
-	/**
-	 * 删除共有情况
-	 * @param id 共有类型id
-	 * @return dto
-	 */
 	@Transactional(rollbackFor = Exception.class)
 	public DTO deleteAgency(String id) {
 		log.info("删除id为-->{}的共有情况数据",id);
@@ -64,15 +53,10 @@ public class DicAgencyService {
 		log.info(CustomRtnEnum.SUCCESS.toString());
 		return new SimpleRtnDTO(CustomRtnEnum.SUCCESS.getStatus(), CustomRtnEnum.SUCCESS.getMsg());
 	}
-
-	/**
-	 * 更新共有情况
-	 * @param co 共有情况
-	 * @return dto
-	 */
 	public DTO updateAgency(DicAgency co) {
-		log.info("更新共有为-->{}的共有情况,",co.getId());
+		log.info("更新共有为-->{}的共有情况",co.getId());
 
+		co.setUpdatedTime(new Date());
 		if (dicAgencyMapper.updateById(co) == 0){
 			log.error(CustomRtnEnum.ERROR_BAD_SQL.toString());
 			return new SimpleRtnDTO(CustomRtnEnum.ERROR_BAD_SQL.getStatus(),CustomRtnEnum.ERROR_BAD_SQL.getMsg());
@@ -81,37 +65,18 @@ public class DicAgencyService {
 		return new SimpleRtnDTO(CustomRtnEnum.SUCCESS.getStatus(), CustomRtnEnum.SUCCESS.getMsg());
 	}
 
-
-
-	/**
-	 * 获得所有共有情况信息
-	 * @return dto
-	 */
 	public DTO getAllAgencyInfo(Page<DicAgency> page, int asc) {
 		log.info("获得所有共有情况信息");
 
 		return getAllDataWithPage(page,asc,dicAgencyMapper);
 	}
-
-
-	/**
-	 * 获得所有共有情况信息
-	 * @return dto
-	 */
 	public DTO getAllAgencyWithoutPage() {
 		log.info("获得所有共有情况信息");
 
 		return getAllDataWithoutPage(dicAgencyMapper);
 	}
 
-	/**
-	 * 通用的方法
-	 * @param page 分页条件
-	 * @param asc 顺序
-	 * @param mapper 查询mapper
-	 * @param <T> 范性
-	 * @return dto
-	 */
+
 	private <T> DTO getAllDataWithPage(Page<T> page, int asc, BaseMapper mapper){
 		Wrapper<T> wrapper;
 
@@ -134,12 +99,6 @@ public class DicAgencyService {
 	}
 
 
-	/**
-	 * 不分页获得所有
-	 * @param mapper 查询对象
-	 * @param <T> 结果泛型
-	 * @return dto
-	 */
 	private <T> DTO getAllDataWithoutPage(BaseMapper<T> mapper){
 
 		List<T> list = mapper.selectList(null);

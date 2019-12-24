@@ -5,6 +5,7 @@ import com.lanswon.commons.web.dto.DTO;
 import com.lanswon.estate.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -30,6 +31,13 @@ public class UserRest {
 	public DTO bindDepartment(@PathVariable(value = "uid")Long uid,
 	                          @PathVariable(value = "did")Long did){
 		return userService.bindDepartment(uid,did);
+	}
+
+	@DeleteMapping(value = "/depart/{uid}/{did}")
+	@ApiOperation(value = "解绑部门")
+	public DTO unbindDepartment(@PathVariable(value = "uid")Long uid,
+	                            @PathVariable(value = "did")Long did){
+		return userService.unbindDepartment(uid,did);
 	}
 
 

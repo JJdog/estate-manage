@@ -3,37 +3,99 @@
 <mapper namespace="com.lanswon.estate.mapper.ReportMapper">
 
 
-    <select id="getRentReport" resultType="java.lang.Object">
-        SELECT sum(t.must_charge) FROM money_rent_must t WHERE t.is_enable =1 GROUP BY  date(t.rent_date)
-    </select>
-    <select id="getHouseReportByDate" resultType="com.lanswon.estate.bean.vo.MonthRentChargeVO">
-        SELECT count(t.is_new_rent) AS dealNum,
-            sum(t1.resource_area) AS rentArea
-        FROM deal t
-            LEFT JOIN house_resource t1 ON t.fk_house_resource_id = t1.id
-        WHERE date(t.start_time) = date(#{date})
-        GROUP BY t.is_new_rent
-    </select>
-    <select id="getHouseAssetsReport" resultType="com.lanswon.estate.bean.vo.report.ReportHouseAssetsVO">
-        SELECT t1.name AS agencyName,
-            count(t.id) AS houseAssetsNum,
-            sum(t.build_area) AS totalBuildArea,
-            sum(t.real_area) AS totalRealArea,
-            sum(t.other_area) AS totalOtherArea
-        FROM house_assets t
-        LEFT JOIN dic_agency t1 ON t.fk_agency_id = t1.id
-        WHERE t.fk_agency_id = #{id}
-    </select>
-    <select id="getHouseResourceReport" resultType="com.lanswon.estate.bean.vo.report.ReportHouseVO">
-    SELECT
-        t3.name AS agency,
-        sum(if(t2.is_new_rent = 1,t.resource_area,0)) AS newRentArea,
-        sum(if(t2.is_new_rent = 2,t.resource_area,0)) AS oldRentArea,
-        sum(t.resource_area) AS totalMonthRentArea
+    <select id="getRentAreaReport" resultType="com.lanswon.estate.bean.vo.report.ReportRentAreaVO">
+        SELECT t3.name                                                                      AS agency,
+               sum(if(t2.is_new_rent = 1 AND t2.deal_exist_status = 1, t.resource_area, 0)) AS newRentArea,
+               sum(if(t2.is_new_rent = 2 AND t2.deal_exist_status = 1, t.resource_area, 0)) AS oldRentArea,
+               sum(if(date_format(t2.start_time, '%Y-%m') = date_format(#{cd.date}, '%Y-%m') AND
+                      t2.deal_exist_status = 1, t.resource_area, 0))                        AS totalMonthRentArea,
+               sum(if(year(t2.start_time) = year(#{cd.date}) AND t2.deal_exist_status = 1, t.resource_area,
+                      0))                                                                   AS totalYearRentArea,
+
+               sum(if(t2.deal_exist_status = 3, t.resource_area, 0))                        AS expireReduceRentArea,
+               sum(if(t2.deal_exist_status = 4, t.resource_area, 0))                        AS aheadReduceRentArea,
+               sum(if(date_format(t2.start_time, '%Y-%m') = date_format(#{cd.date}, '%Y-%m') AND
+                      t2.deal_exist_status = 3, t.resource_area, 0))                        AS totalMonthReduceRentArea,
+               sum(if(year(t2.start_time) = year(#{cd.date}) AND t2.deal_exist_status = 3, t.resource_area,
+                      0))                                                                   AS totalYearReduceRentArea,
+
+               SUM(if(date_format(t2.start_time, '%Y-%m') = date_format(#{cd.date}, '%Y-%m') AND t.sell_status = 2,
+                      t.resource_area, 0))                                                  AS totalSellNoPro,
+               SUM(if(date_format(t2.start_time, '%Y-%m') = date_format(#{cd.date}, '%Y-%m') AND t.sell_status = 3,
+                      t.resource_area, 0))                                                  AS totalSellHasPro
         FROM house_resource t
-            LEFT JOIN mid_deal_house t1 ON t1.fk_house_resource_id = t.id
-            LEFT JOIN deal t2 ON t1.fk_deal_id = t2.id
-            LEFT JOIN dic_agency t3 ON t.fk_agency_id = t3.id
+                 LEFT JOIN mid_deal_house t1 ON t1.fk_house_resource_id = t.id
+                 LEFT JOIN deal t2 ON t1.fk_deal_id = t2.id
+                 LEFT JOIN dic_agency t3 ON t.fk_agency_id = t3.id
+        GROUP BY t.fk_agency_id;
     </select>
+
+
+    <select id="getRentMoneyReport" resultType="com.lanswon.estate.bean.vo.report.ReportRentMoneyVO">
+        SELECT t4.name                                                                   AS agency,
+               t3.fk_agency_id                                                           AS aid,
+               if(date_format(t.rent_date, '%Y-%m') = date_format(#{cd.date}, '%Y-%m'), round(sum(t.must_charge), 0),
+                  2)                                                                     AS monthMustMoney,
+               if(year(t.rent_date) = year(#{cd.date}), round(sum(t.must_charge), 0), 2) AS yearMustMoney
+        FROM money_rent_must t
+                 LEFT JOIN deal t1 ON t.fk_deal_id = t1.id
+                 LEFT JOIN mid_deal_house t2 ON t2.fk_deal_id = t1.id
+                 LEFT JOIN house_resource t3 ON t2.fk_house_resource_id = t3.id
+                 LEFT JOIN dic_agency t4 ON t3.fk_agency_id = t4.id
+        GROUP BY t3.fk_agency_id;
+    </select>
+
+
+    <select id="getCompRealMoneyByAgency" resultType="com.lanswon.estate.bean.vo.report.comp.CompRealMoney">
+
+        SELECT if(date_format(t.money_date, '%Y-%m') = date_format(#{date}, '%Y-%m'), sum(t.money),
+                  0)                                                   AS monthRealMoney,
+               if(year(t.money_date) = year(#{date}), sum(t.money), 0) AS yearRealMoney
+        FROM money_real_flow t
+                 LEFT JOIN money_rent_must t1 ON t.fk_must_money_id = t1.id
+                 LEFT JOIN deal t2 ON t1.fk_deal_id = t2.id
+                 LEFT JOIN mid_deal_house t3 ON t3.fk_deal_id = t2.id
+                 LEFT JOIN house_resource t4 ON t3.fk_house_resource_id = t4.id
+        WHERE t4.fk_agency_id = #{aid}
+    </select>
+
+
+    <select id="getCompRealArrearsByAgency" resultType="com.lanswon.estate.bean.vo.report.comp.CompRealArrears">
+        SELECT if(date_format(t.money_date, '%Y-%m') = date_format(#{date}, '%Y-%m'), sum(t.money), 0) AS monthArrears,
+               if(year(t.money_date) = year(#{date}), sum(t.money), 0)                                 AS yearArrears
+        FROM money_real_flow t
+                 LEFT JOIN money_arrears_must t1 ON t.fk_must_money_id = t1.id
+                 LEFT JOIN deal t2 ON t1.fk_deal_id = t2.id
+                 LEFT JOIN mid_deal_house t3 ON t3.fk_deal_id = t2.id
+                 LEFT JOIN house_resource t4 ON t3.fk_house_resource_id = t4.id
+        WHERE t4.fk_agency_id = #{aid}
+    </select>
+
+
+    <select id="getHouseReport" resultType="com.lanswon.estate.bean.vo.report.ReportHouseVO">
+        SELECT t2.name                           AS agency,
+               t.fk_agency_id                    AS aid,
+               t1.name                           AS houseName,
+               t.fk_house_name_id                AS hid,
+               sum(t.yz_area)                    AS houseYzArea,
+               sum(t.wz_area)                    AS houseWzArea,
+               (sum(t.yz_area) + sum(t.wz_area)) AS houseTotalArea
+        FROM house_assets t
+                 LEFT JOIN dic_house_name t1 ON t.fk_house_name_id = t1.id
+                 LEFT JOIN dic_agency t2 ON t.fk_agency_id = t2.id
+        GROUP BY t.fk_agency_id
+    </select>
+    <select id="getCompLandArea" resultType="com.lanswon.estate.bean.vo.report.comp.CompLandArea">
+        SELECT sum(t.yz_area)                    AS landYzArea,
+               sum(t.wz_area)                    AS landWzArea,
+               (sum(t.yz_area) + sum(t.wz_area)) AS landTotalArea
+        FROM land_assets t
+            LEFT JOIN house_assets t1 ON t1.fk_land_assets_id = t.id
+        WHERE t1.fk_house_name_id = #{hid}
+    </select>
+    <select id="getCompResourceArea" resultType="com.lanswon.estate.bean.vo.report.comp.CompResourceArea">
+
+    </select>
+
 </mapper>
     

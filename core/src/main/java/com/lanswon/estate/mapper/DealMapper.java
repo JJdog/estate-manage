@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lanswon.estate.bean.cd.DealCD;
 import com.lanswon.estate.bean.pojo.Deal;
 import com.lanswon.estate.bean.vo.*;
+import com.lanswon.estate.bean.vo.page.DealPage;
+import com.lanswon.estate.bean.vo.page.NoRentDealPage;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
@@ -35,16 +37,16 @@ public interface DealMapper extends BaseMapper<Deal> {
 	 * @param id 合同id
 	 * @return 合同
 	 */
-	@Update("UPDATE deal t SET  deal_exist_status = 4 WHERE t.id = #{id} ")
-	boolean stopDeal(long id);
+	@Update("UPDATE deal t SET  deal_exist_status = #{status} WHERE t.id = #{id} ")
+	boolean stopDeal(@Param("id") long id,
+	                 @Param("status") int status);
 
 	/**
 	 * 依据合同id获得房源id
 	 * @param id 合同id
 	 * @return 房源id
 	 */
-	@Select("SELECT t.fk_house_resource_id FROM deal t WHERE t.id = #{id} ")
-	long getHouseResourceIdByDealId(long id);
+	List<Long> getHouseResourceIdByDealId(long id);
 
 	/**
 	 * 获得合同的状态(租\售 状态)
@@ -68,8 +70,8 @@ public interface DealMapper extends BaseMapper<Deal> {
 	 * @param cd 查询条件
 	 * @return 合同s
 	 */
-	IPage<NoRentDealPage> getNoReviewDealInfoPage(Page<Object> objectPage,
-	                                        @Param("cd") DealCD cd);
+	IPage<DealPage> getNoReviewDealInfoPage(Page<Object> objectPage,
+	                                              @Param("cd") DealCD cd);
 
 	/**
 	 * 获得预警合同信息
@@ -90,4 +92,9 @@ public interface DealMapper extends BaseMapper<Deal> {
 	@Select("SELECT t.deal_serial FROM deal t ORDER BY created_time DESC LIMIT 1")
 	String getLatestSeqByType();
 
+	@Select("SELECT t.pay_type FROM deal t WHERE t.id = #{id} ")
+	int getPermonthByDealId(long id);
+
+
+	double getMonthRentByDealId(long id);
 }

@@ -38,9 +38,8 @@ public class IoRest {
 		return ioService.importHouseAssets(file);
 	}
 
-
 	@PostMapping(value = "/resource/in")
-	public DTO importHouseResource(@RequestParam(value = "file") MultipartFile file){
+	public DTO importHouseResource(@RequestParam(value = "file") MultipartFile file) throws IOException {
 		return ioService.importHouseResource(file);
 	}
 

@@ -4,13 +4,10 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lanswon.estate.bean.cd.RentCD;
-import com.lanswon.estate.bean.po.PoiTransFlow;
 import com.lanswon.estate.bean.pojo.RentCharge;
 import com.lanswon.estate.bean.vo.MonthRentChargeVO;
-import com.lanswon.estate.bean.vo.MustMoneyPageVO;
-import com.lanswon.estate.bean.vo.MustMoneyVO;
+import com.lanswon.estate.bean.vo.page.MustMoneyPageVO;
 import com.lanswon.estate.bean.vo.SimpleWarnRentVO;
-import com.lanswon.estate.bean.vo.report.RentChargeHasDateAndLastNoDateVO;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
@@ -39,9 +36,10 @@ public interface RentChargeMapper extends BaseMapper<RentCharge> {
 	 * @param date 冻结开始时间
 	 * @return boolean
 	 */
-
+	@Update("UPDATE money_rent_must t SET t.is_enable = #{enable}  WHERE t.fk_deal_id = #{id} AND t.rent_date >= #{date}")
 	boolean freezeRentCharge(@Param("id") long id,
-	                         @Param("date") Date date);
+	                         @Param("date") Date date,
+	                         @Param("enable") int enable);
 
 	/**
 	 * 尾款租金
@@ -55,8 +53,9 @@ public interface RentChargeMapper extends BaseMapper<RentCharge> {
 	@Delete("DELETE FROM money_rent_must WHERE fk_deal_id = #{id} ")
 	boolean deleteByDealId(@Param("id") long id);
 
-	@Update("UPDATE money_rent_must t SET t.is_enable = 1 WHERE t.fk_deal_id = #{id} ")
-	boolean enableRentCharge(long id);
+	@Update("UPDATE money_rent_must t SET t.is_enable = #{enable}  WHERE t.fk_deal_id = #{id} ")
+	boolean enableRentCharge(@Param("id") long id,
+	                         @Param("enable") int enable);
 
 	@Update("UPDATE money_rent_must t SET t.is_enable = 3 WHERE t.fk_deal_id = #{id} ")
 	boolean recallRentChargeByDealId(long id);
@@ -69,7 +68,7 @@ public interface RentChargeMapper extends BaseMapper<RentCharge> {
 	boolean pay4Rent(@Param("id") long id,
 	                 @Param("money") double money);
 
-	@Select("SELECT t.rent_date  FROM money_rent_must t WHERE t.is_enable = 1 ORDER BY t.rent_date DESC LIMIT 1")
+	@Select("SELECT t.rent_date  FROM money_rent_must t WHERE t.is_enable = 2 AND t.fk_deal_id = #{id} ORDER BY t.rent_date DESC LIMIT 1")
 	Date getLastHasRentedDateByDealId(long id);
 
 	@Select("SELECT t.rent_date FROM money_rent_must t WHERE t.is_enable = 3 ORDER BY t.rent_date ASC ")

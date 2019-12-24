@@ -6,10 +6,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lanswon.estate.bean.cd.HouseAssetsCD;
 import com.lanswon.estate.bean.po.DmenuVO;
 import com.lanswon.estate.bean.pojo.HouseAssets;
-import com.lanswon.estate.bean.vo.HouseAssetsPageVO;
+import com.lanswon.estate.bean.vo.page.HouseAssetsPageVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

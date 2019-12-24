@@ -14,65 +14,44 @@ import java.io.Serializable;
 public class DetailHouseResourceVO implements Serializable {
 
 	/** id */
-	private long id;
-
-	/////房源信息////
-
-	///** 房源名称 */
-	//private String resourceName;
-
-	/** 管理单位id */
-	private long agencyId;
+	private Long id;
 
 	/** 管理单位 */
+	private Long agencyId;
 	private String agency;
 
-	/** 园区/楼宇*/
-	private String park;
+	/** 地址 */
+	private String location;
 
+	/** 楼宇*/
+	private String park;
 	/** 楼号 */
 	private String buildNo;
-
 	/** 楼层 */
-	private int buildLevel;
-
+	private String buildLevel;
 	/** 房间号 */
 	private String buildRoom;
 
 	/** 房源总面积面积 */
-	private double resourceArea;
+	private Double resourceArea;
+	/** 有证面积 */
+	private Double resourceYzArea;
+	/** 无证面积 */
+	private Double resourceWzArea;
 
-	/** 房源总面积面积 */
-	private double resourceYzArea;
-
-	/** 房源总面积面积 */
-	private double resourceWzArea;
-
-	/** 原租金 */
-	private double originRentCharge;
-
+	/** 历史租金 */
+	private Double originRentCharge;
 	/** 指导价 */
-	private double guideRentCharge;
-
-	/** 指导每平方米月租金 */
-	private double guideRentMoneyPerArea;
-
-	/** 实际租金 */
-	private double realRentCharge;
-
-	/** 每平方米月租金 */
-	private double rentMoneyPerArea;
-
-	/** 出租代码 */
-	private int rentCode;
+	private Double guideRentCharge;
+	/** 合同价 */
+	private Double realRentCharge;
 
 	/** 出租状态 */
+	private Integer rentCode;
 	private String rentStatus;
 
-	/** 出售代码 */
-	private int sellCode;
-
 	/** 出售状态 */
+	private Integer sellCode;
 	private String sellStatus;
 
 	/** 备注 */
@@ -81,7 +60,7 @@ public class DetailHouseResourceVO implements Serializable {
 	/////房产信息///
 
 	/** 房产id */
-	private long assetsId;
+	private Long assetsId;
 
 	/** 房产名称 */
 	private String assetsName;
@@ -90,7 +69,7 @@ public class DetailHouseResourceVO implements Serializable {
 	private String houseOwner;
 
 	/** 房产总楼层 */
-	private int totalLevel;
+	private Integer totalLevel;
 
 	/** 房产坐落 */
 	private String houseLocation;
@@ -99,6 +78,9 @@ public class DetailHouseResourceVO implements Serializable {
 	private String houseUsage;
 
 	////土地信息///
+
+	/** 土地证号 */
+	private String landNo;
 
 	/** 土地使用权人 */
 	private String landOwner;

@@ -2,11 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lanswon.estate.mapper.HouseResourceMapper">
 
-    <select id="getHouseResourcePage" resultType="com.lanswon.estate.bean.vo.HouseResourcePageVO">
+    <select id="getHouseResourcePage" resultType="com.lanswon.estate.bean.vo.page.HouseResourcePageVO">
         SELECT t.id,
         t.fk_agency_id,
         t2.name AS agency,
-        CONCAT(t2.name,t.park,ifnull(t.build_no,'/'),'栋',ifnull(t.build_level,'/'),'层',ifnull(t.build_room,'')) AS location,
+        CONCAT(t2.name,ifnull(t.park,''),ifnull(t.build_no,'/'),'栋',ifnull(t.build_level,'/'),'层',ifnull(t.build_room,''))
+        AS location,
         t.park,
         t.build_no,
         t.build_level,
@@ -104,7 +105,6 @@
                t.resource_area,
                t.origin_rent_charge,
                t.guide_rent_charge,
-               t.real_rent_charge,
                t.rent_status                                              AS rentCode,
                CASE t.rent_status WHEN 0 THEN '未出租' WHEN 1 THEN '已出租' END AS rentStatus,
                t.sell_status                                              AS sellCode,
@@ -119,50 +119,55 @@
     </select>
     <select id="getNoRentHouseResource" resultType="com.lanswon.estate.bean.vo.HouseResourceMenuVO">
         SELECT t.id,
-               CONCAT(t1.name,t.park,ifnull(t.build_no,'/'),'栋',ifnull(t.build_level,'/'),'层',ifnull(t.build_room,'')) AS  resourceName
+               CONCAT(t1.name, t.park, ifnull(t.build_no, '/'), '栋', ifnull(t.build_level, '/'), '层',
+                      ifnull(t.build_room, '')) AS resourceName,
+               t.resource_area,
+               t.guide_rent_charge
         FROM house_resource t
-            LEFT JOIN dic_agency t1 ON t.fk_agency_id = t1.id
-        WHERE t.rent_status = 0
-          AND sell_status = 0
+                 LEFT JOIN dic_agency t1 ON t.fk_agency_id = t1.id
+        WHERE t.rent_status = 1
+          AND sell_status = 1
 
     </select>
 
     <select id="getHouseResourceDetailByDealId" resultType="com.lanswon.estate.bean.vo.DetailHouseResourceVO">
-        SELECT
-            t.id,
-            CONCAT(t2.name,t.park,ifnull(t.build_no,'/'),'栋',ifnull(t.build_level,'/'),'层',ifnull(t.build_room,'')) AS resourceName,
-            t2.id AS agencyId,
-            t2.name AS agency,
-            t.park,
-            t.build_no,
-            t.build_level,
-            t.build_room,
-            t.resource_area,
-            t.origin_rent_charge,
-            t.guide_rent_charge,
-            convert(t.guide_rent_charge / t.resource_area,decimal(10,2)) AS guideRentMoneyPerArea,
-            t.real_rent_charge,
-            t.rent_money_per_area AS rentMoneyPerArea,
-            t.rent_status AS rentCoede,
-            t.rent_status,
-            t.sell_status AS sellCode,
-            t.sell_status,
-            t6.name AS  houseUsage,
-            t.remark,
-            t3.id AS assetsId,
-            t3.fk_house_name_id,
-            t4.name AS houseOwner,
-            t3.total_level,
-            t3.location AS houseLocation,
-            t5.assets_location AS landLocation,
-            t5.land_num
+        SELECT t.id,
+               t2.id                            AS agencyId,
+               t2.name                          AS agency,
+               CONCAT(t2.name, t.park, ifnull(t.build_no, '/'), '栋', ifnull(t.build_level, '/'), '层',
+                      ifnull(t.build_room, '')) AS location,
+               t.park,
+               t.build_no,
+               t.build_level,
+               t.build_room,
+               t.resource_area,
+               t.yz_area                        AS resourceYzArea,
+               t.wz_area                        AS resourceWzArea,
+               t.origin_rent_charge,
+               t.guide_rent_charge,
+               t1.real_money                    AS realRentCharge,
+               t.rent_status                    AS rentCoede,
+               t.rent_status,
+               t.sell_status                    AS sellCode,
+               t.sell_status,
+               t.remark,
+               t3.id                            AS assetsId,
+               t7.name                          AS assetsName,
+               t4.name                          AS houseOwner,
+               t3.total_level,
+               t3.location                      AS houseLocation,
+               t6.name                          AS houseUsage,
+               t5.land_no,
+               t5.assets_location               AS landLocation,
+               t5.land_num
         FROM house_resource t
-        LEFT JOIN mid_deal_house t1 ON t1.fk_house_resource_id = t.id
-        LEFT JOIN dic_agency t2 ON t.fk_agency_id = t2.id
-        LEFT JOIN house_assets t3 ON t.fk_house_assets_id = t3.id
-        LEFT JOIN dic_assets_co t4 ON t3.fk_own_id = t4.id
-        LEFT JOIN land_assets t5 ON t3.fk_land_assets_id = t5.id
-        LEFT JOIN dic_house_usage t6 ON t6.id = t3.fk_house_usage
+                 LEFT JOIN mid_deal_house t1 ON t1.fk_house_resource_id = t.id
+                 LEFT JOIN dic_agency t2 ON t.fk_agency_id = t2.id
+                 LEFT JOIN house_assets t3 ON t.fk_house_assets_id = t3.id
+                 LEFT JOIN dic_assets_co t4 ON t3.fk_own_id = t4.id
+                 LEFT JOIN land_assets t5 ON t3.fk_land_assets_id = t5.id
+                 LEFT JOIN dic_house_usage t6 ON t6.id = t3.fk_house_usage
+                 LEFT JOIN dic_house_name t7 ON t3.fk_house_name_id = t7.id
         WHERE t1.fk_deal_id = #{id}
     </select>
 

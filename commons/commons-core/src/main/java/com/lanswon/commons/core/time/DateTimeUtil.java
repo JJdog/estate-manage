@@ -2,10 +2,9 @@ package com.lanswon.commons.core.time;
 
 
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.UnsupportedTemporalTypeException;
 import java.util.Calendar;
 import java.util.Date;
@@ -93,6 +92,19 @@ public final class DateTimeUtil {
 	}
 
 	/**
+	 * 返回指定月中的天
+	 * @param date 日期
+	 * @param day 指定天
+	 * @return 指定日期
+	 */
+	public static Calendar getDayOfMonth(Date date,int day){
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.set(calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH),day);
+		return calendar;
+	}
+
+	/**
 	 * 获得date到月底的天数
 	 * @param date 时间
 	 * @return 天数
@@ -100,14 +112,33 @@ public final class DateTimeUtil {
 	public static int getDaysToEndOfMonth(Date date){
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
-		return calendar.getActualMaximum(Calendar.DAY_OF_MONTH) - calendar.get(Calendar.DAY_OF_MONTH);
+		return calendar.getActualMaximum(Calendar.DAY_OF_MONTH) - calendar.get(Calendar.DAY_OF_MONTH) + 1;
 	}
 
 	public static int getDaysToStartOfMonth(Date date){
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
-		return  calendar.get(Calendar.DAY_OF_MONTH)- calendar.getActualMinimum(Calendar.DAY_OF_MONTH);
+		return  calendar.get(Calendar.DAY_OF_MONTH)- calendar.getActualMinimum(Calendar.DAY_OF_MONTH) + 1;
 	}
+
+	public static long getDaysBtDate(Date d1,Date d2){
+		LocalDateTime startDate = convertDate2LocalDateTime(d1);
+		LocalDateTime endDate = convertDate2LocalDateTime(d2);
+		return startDate.until(endDate, ChronoUnit.DAYS);
+	}
+
+
+	/*=======================转换==========================*/
+
+
+
+	public static LocalDateTime convertDate2LocalDateTime(Date date){
+		Instant instant = date.toInstant();
+		ZoneId zoneId = ZoneId.systemDefault();
+
+		return instant.atZone(zoneId).toLocalDateTime();
+	}
+
 
 	public static int getMonthsBtDate(Date d1,Date d2){
 		Calendar c1 = Calendar.getInstance();

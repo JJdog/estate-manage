@@ -24,7 +24,10 @@ public class MustMoneyVO {
 	private String mustDate;
 
 	/** 应收金额 */
-	private double money;
+	private Double money;
+
+	/** 应收状态(正常/不正常) */
+	private String payStatus;
 
 	/** 应收类型 */
 	private String moneyType;

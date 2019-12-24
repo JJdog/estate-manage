@@ -1,26 +1,42 @@
 package com.lanswon.estate.mapper;
 
-import com.lanswon.estate.bean.cd.RentReportCD;
 import com.lanswon.estate.bean.cd.ReportCD;
-import com.lanswon.estate.bean.vo.MonthRentChargeVO;
-import com.lanswon.estate.bean.vo.report.ReportHouseAssetsVO;
-import com.lanswon.estate.bean.vo.report.ReportHouseResourceVO;
 import com.lanswon.estate.bean.vo.report.ReportHouseVO;
+import com.lanswon.estate.bean.vo.report.ReportRentAreaVO;
+import com.lanswon.estate.bean.vo.report.ReportRentMoneyVO;
+import com.lanswon.estate.bean.vo.report.comp.CompLandArea;
+import com.lanswon.estate.bean.vo.report.comp.CompRealArrears;
+import com.lanswon.estate.bean.vo.report.comp.CompRealMoney;
+import com.lanswon.estate.bean.vo.report.comp.CompResourceArea;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
 
+/**
+ * 报表Repo
+ *
+ * @author jaswine
+ */
 @Repository
 public interface ReportMapper {
 
-	List<Object> getRentReport(@Param("cd") RentReportCD cd);
+	/** 租赁面积 */
+	List<ReportRentAreaVO> getRentAreaReport(@Param("cd") ReportCD cd);
 
-	MonthRentChargeVO getHouseReportByDate(@Param("date") Date time);
+	/** 租金 */
+	List<ReportRentMoneyVO> getRentMoneyReport(@Param("cd") ReportCD cd);
 
-	ReportHouseAssetsVO getHouseAssetsReport(@Param("id") Long id);
+	CompRealMoney getCompRealMoneyByAgency(@Param("date") Date date,
+	                                       @Param("aid") Long aid);
 
-	List<ReportHouseVO> getHouseResourceReport(@Param("cd") ReportCD cd);
+	CompRealArrears getCompRealArrearsByAgency(@Param("date") Date date,
+	                                           @Param("aid") Long aid);
+
+	List<ReportHouseVO> getHouseReport(@Param("cd") ReportCD cd);
+
+	CompLandArea getCompLandArea(@Param("hid") Long hid);
+
+	CompResourceArea getCompResourceArea(@Param("hid") Long hid);
 }

@@ -47,7 +47,7 @@ public class HouseResource extends BasePojo {
 	private String buildNo;
 
 	@ApiModelProperty(value = "楼层")
-	private long buildLevel;
+	private String buildLevel;
 
 	@ApiModelProperty(value = "房间号")
 	private String buildRoom;

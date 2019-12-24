@@ -1,10 +1,9 @@
 package com.lanswon.estate.bean.po;
 
 
-import cn.afterturn.easypoi.excel.annotation.Excel;
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lanswon.commons.web.pojo.BasePojo;
 import lombok.Data;
 
@@ -21,18 +20,18 @@ import java.util.Date;
 public class PoiHouseAssetsPO extends BasePojo {
 
 	/** 房产名称 */
-	@Excel(name = "房产名称*")
+	@ExcelProperty(value= "房产名称*")
 	@TableField(exist = false)
 	private String assetsName;
 	private Long fkHouseNameId;
 
 
 	/** 房产权id */
-	@Excel(name = "房产证号*")
+	@ExcelProperty(value= "房产证号*")
 	private String houseId;
 
 
-	@Excel(name = "产权人名称*")
+	@ExcelProperty(value= "产权人名称*")
 	@TableField(exist = false)
 	@NotNull(message = "产权人不可为空")
 	private String owner;
@@ -40,10 +39,10 @@ public class PoiHouseAssetsPO extends BasePojo {
 	private Long fkOwnId;
 
 	/** 地址 */
-	@Excel(name = "地址")
+	@ExcelProperty(value= "地址")
 	private String location;
 
-	@Excel(name = "共有情况")
+	@ExcelProperty(value= "共有情况")
 	@TableField(exist = false)
 	@NotNull(message = "共有情况不可为空")
 	private String houseShare;
@@ -51,7 +50,7 @@ public class PoiHouseAssetsPO extends BasePojo {
 	private Long fkHouseShareId;
 
 	/** 管理单位名称 */
-	@Excel(name = "管理单位*")
+	@ExcelProperty(value= "管理单位*")
 	@TableField(exist = false)
 	@NotNull(message = "管理单位不可为空")
 	private String agencyName;
@@ -59,14 +58,14 @@ public class PoiHouseAssetsPO extends BasePojo {
 	private Long fkAgencyId;
 
 
-	@Excel(name = "房产性质")
+	@ExcelProperty(value= "房产性质")
 	@TableField(exist = false)
 	private String houseNature;
 
 	/** 房产性质 */
 	private Long fkHouseNature;
 
-	@Excel(name = "规划用途")
+	@ExcelProperty(value= "规划用途")
 	@TableField(exist = false)
 	private String houseUsage;
 	/** 规划用途 */
@@ -74,30 +73,30 @@ public class PoiHouseAssetsPO extends BasePojo {
 
 
 	/** 总层数 */
-	@Excel(name = "总层数")
+	@ExcelProperty(value= "总层数")
 	private Long totalLevel;
 
-	@Excel(name = "有证面积*")
+	@ExcelProperty(value= "有证面积*")
 	private Double yzArea;
 
-	@Excel(name = "无证面积*")
+	@ExcelProperty(value= "无证面积*")
 	private Double wzArea;
 
 	/** 建筑面积 */
-	@Excel(name = "建筑面积")
+	@ExcelProperty(value= "建筑面积")
 	private double buildArea;
 
 
 	/** 套内面积 */
-	@Excel(name = "套内面积")
+	@ExcelProperty(value= "套内面积")
 	private double realArea;
 
 
 	/** 其他面积 */
-	@Excel(name = "其他面积")
+	@ExcelProperty(value= "其他面积")
 	private double otherArea;
 
-	@Excel(name = "土地证号*")
+	@ExcelProperty(value= "土地证号*")
 	@TableField(exist = false)
 	private String landNo;
 	/** 土地信息 */
@@ -105,12 +104,12 @@ public class PoiHouseAssetsPO extends BasePojo {
 
 
 	/** 登记时间 */
-	@Excel(name = "登记时间")
+	@ExcelProperty(value= "登记时间")
 	private Date registerTime;
 
 
 	/** 备注 */
-	@Excel(name = "备注")
+	@ExcelProperty(value= "备注")
 	private String remark;
 
 }

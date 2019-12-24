@@ -1,46 +1,54 @@
 package com.lanswon.estate.bean.vo.report;
 
-
 import lombok.Data;
 
-import java.util.List;
-
 /**
- * 房源统计信息
+ * 资产大统计
  *
  * @author jaswine
  */
 @Data
 public class ReportHouseVO {
 
-
-
 	/** 管理单位 */
+	private Long aid;
 	private String agency;
 
-	/** 新签 */
-	private double newRentArea;
+	/** 房产名称 */
+	private Long hid;
+	private String houseName;
 
-	/** 续签 */
-	private double oldRentArea;
+	/** 房产有证面积 */
+	private Double houseYzArea;
+	/** 房产无证面积 */
+	private Double houseWzArea;
+	/** 房产总面积 */
+	private Double houseTotalArea;
 
-	/** 月总面积 */
-	private double totalMonthRentArea;
+	/** 土产有证面积 */
+	private Double landYzArea;
+	/** 土产无证面积 */
+	private Double landWzArea;
+	/** 土产总面积 */
+	private Double landTotalArea;
 
-	/** 年总面积 */
-	private double totalYearRentArea;
+	/** 正常出租 */
+	private Double normalRentArea;
+	/** 长期无收益 */
+	private Double longRentArea;
+	/** 公共设施 */
+	private Double publicRentArea;
+	/** 车库 */
+	private Double garageRentArea;
+	/** 完全自用 */
+	private Double selfRentArea;
+	/** 小计 */
+	private Double totalRentArea;
 
-	/** 到期退租 */
-	private double expireReduceRentArea;
 
-	/** 提前结束退租 */
-	private double aheadReduceRentArea;
-
-	/** 月总面积 */
-	private double totalMonthReduceRentArea;
-
-	/** 年总面积 */
-	private double totalYearReduceRentArea;
-
+	/** 闲置 */
+	private Double noRentArea;
+	/** 出售未过户 */
+	private Double selledNoProArea;
 
 }

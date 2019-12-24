@@ -2,7 +2,6 @@ package com.lanswon.estate.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lanswon.commons.web.dto.DTO;
 import com.lanswon.commons.web.rtn.CustomRtnEnum;
@@ -11,7 +10,7 @@ import com.lanswon.commons.web.rtn.SimpleRtnDTO;
 import com.lanswon.estate.bean.cd.HouseAssetsCD;
 import com.lanswon.estate.bean.po.DmenuVO;
 import com.lanswon.estate.bean.pojo.HouseAssets;
-import com.lanswon.estate.bean.vo.HouseAssetsPageVO;
+import com.lanswon.estate.bean.vo.page.HouseAssetsPageVO;
 import com.lanswon.estate.mapper.HouseAssetsMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -70,11 +69,14 @@ public class HouseAssetsService {
 	public DTO updateHouseAssets(HouseAssets houseAssets) {
 		log.info("更新id为:{}的房屋资产信息",houseAssets.getId());
 
-		if (houseAssetsMapper.selectOne(new QueryWrapper<HouseAssets>().eq("house_id", houseAssets.getHouseId())) != null){
-			log.error("房产证号已存在");
-			return new SimpleRtnDTO(CustomRtnEnum.RESOURCE_NON_EXIST.getStatus(),"房产证号已存在");
+		if (!houseAssets.getHouseId().equals(houseAssetsMapper.selectById(houseAssets.getId()).getHouseId())){
+			if (houseAssetsMapper.selectOne(new QueryWrapper<HouseAssets>().eq("house_id", houseAssets.getHouseId())) != null){
+				log.error("房产证号已存在");
+				return new SimpleRtnDTO(CustomRtnEnum.RESOURCE_NON_EXIST.getStatus(),"房产证号已存在");
+			}
 		}
 
+		houseAssets.setUpdatedTime(new Date());
 		if (houseAssetsMapper.updateById(houseAssets) == 0){
 			log.error(CustomRtnEnum.RESOURCE_NON_EXIST.toString());
 			return new SimpleRtnDTO(CustomRtnEnum.RESOURCE_NON_EXIST.getStatus(),CustomRtnEnum.RESOURCE_NON_EXIST.getMsg());

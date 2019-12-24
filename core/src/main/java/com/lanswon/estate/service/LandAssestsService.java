@@ -13,6 +13,7 @@ import com.lanswon.commons.web.rtn.DataRtnDTO;
 import com.lanswon.commons.web.rtn.SimpleRtnDTO;
 import com.lanswon.estate.bean.DatabaseConstants;
 import com.lanswon.estate.bean.cd.LandAssetsCD;
+import com.lanswon.estate.bean.pojo.HouseAssets;
 import com.lanswon.estate.bean.pojo.LandAssets;
 import com.lanswon.estate.bean.vo.LandAssetsVO;
 import com.lanswon.estate.mapper.LandAssetsMapper;
@@ -64,6 +65,14 @@ public class LandAssestsService {
 	public DTO updateLandAssets(LandAssets landAssets) {
 
 		log.info("更新id为:{}的土地资产信息",landAssets.getId());
+
+		if (!landAssets.getLandNo().equals(landAssetsMapper.selectById(landAssets.getId()).getLandNo())){
+			if (landAssetsMapper.selectOne(new QueryWrapper<LandAssets>().eq("land_no", landAssets.getLandNo())) != null){
+				log.error("土地证号已存在");
+				return new SimpleRtnDTO(CustomRtnEnum.RESOURCE_NON_EXIST.getStatus(),"土地证号已存在");
+			}
+		}
+
 		landAssets.setUpdatedTime(new Date());
 		if (landAssetsMapper.updateById(landAssets) == 0){
 			log.error(CustomRtnEnum.RESOURCE_NON_EXIST.toString());

@@ -1,0 +1,23 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        cluster-name: lanswon
+        server-addr: 192.168.2.7:8848
+---
+spring:
+  datasource:
+    druid:
+      url: jdbc:mysql://rm-uf6uj9b175xy597fl3o.mysql.rds.aliyuncs.com:3306/estate?characterEncoding=utf8&useSSL=false
+      username: jaswine
+      password: Jasmine1017
+#       url: jdbc:mysql://192.168.2.12:3306/estate?characterEncoding=utf8&useSSL=false
+#       username: root
+#       password: 123456
+
+---
+spring:
+  data:
+    elasticsearch:
+      cluster-nodes: 192.168.2.12:9300
+      cluster-name: docker-cluster
