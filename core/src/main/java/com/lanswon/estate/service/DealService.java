@@ -34,6 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ResourceUtils;
+import org.apache.catalina.ssi.ByteArrayServletOutputStream;
+
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
@@ -655,6 +657,7 @@ public class DealService {
 	public void getDealPdf(Long did,HttpServletResponse response) throws IOException, DocumentException {
 		DealTemp dealTemp = dealMapper.getDealWordInfo(did);
 		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(dealTemp.getRenter(), "utf-8")+ ".pdf");
+		GenertorPdfImpl.createPdf(new ByteArrayServletOutputStream(),dealTemp);
 		GenertorPdfImpl.createPdf(response.getOutputStream(),dealTemp);
 
 	}
