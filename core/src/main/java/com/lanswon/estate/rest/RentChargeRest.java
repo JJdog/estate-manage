@@ -11,16 +11,23 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
+/**
+ * 租金REST
+ *
+ * @author jaswine
+ */
 @RestController
 @RequestMapping(value = "/rent")
-@Api(value = "资金",tags = "资金")
+@Api(value = "租金",tags = "租金")
 public class RentChargeRest {
 
 	@Resource
 	private RentChargeService rentChargeService;
 
+
 	@GetMapping("/detail/{id}")
 	@ApiOperation(value = "依据合同查看租金信息")
+	@Deprecated
 	public DTO getDetailRentChargeInfo(@PathVariable(value = "id") long id){
 		return rentChargeService.getDetailRentChargeInfo(id);
 	}
@@ -30,7 +37,6 @@ public class RentChargeRest {
 	public DTO getDetailRentChargeInfo(@RequestBody RentCD cd){
 		return rentChargeService.getDetailRentChargeInfoByDate(cd);
 	}
-
 
 
 	@PutMapping("/pay")

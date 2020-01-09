@@ -1,5 +1,7 @@
 package com.lanswon.estate.bean.vo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.lanswon.commons.core.json.CustomDoubleSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,7 +28,8 @@ public class TransFlowVO {
 	private String moneyDate;
 
 	/** 收款金额 */
-	private  double money;
+	@JsonSerialize(using = CustomDoubleSerialize.class)
+	private  Double money;
 
 	/** 收款类型 */
 	private String moneyType;

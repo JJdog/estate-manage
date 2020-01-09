@@ -10,8 +10,11 @@ import com.lanswon.commons.web.rtn.DataRtnDTO;
 import com.lanswon.commons.web.rtn.SimpleRtnDTO;
 import com.lanswon.estate.bean.cd.HouseResourceCD;
 import com.lanswon.estate.bean.pojo.HouseResource;
+import com.lanswon.estate.bean.pojo.dic.DicAgency;
+import com.lanswon.estate.bean.pojo.dic.DicHouseName;
 import com.lanswon.estate.bean.vo.DetailHouseResourceVO;
 import com.lanswon.estate.bean.vo.HouseResourceMenuVO;
+import com.lanswon.estate.bean.vo.dmenu.HouseResourceDmenu;
 import com.lanswon.estate.bean.vo.page.HouseResourcePageVO;
 import com.lanswon.estate.mapper.HouseResourceMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -164,4 +167,53 @@ public class HouseResourceService {
 		log.info(CustomRtnEnum.SUCCESS.toString());
 		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(),CustomRtnEnum.SUCCESS.getMsg(),pageList);
 	}
+
+	public DTO getAgencyNameAndIdById(Long aid) {
+
+		log.info("获得联动菜单--管理单位");
+		List<DicAgency> agencys = houseResourceMapper.getAgencyNameAndIdById(aid);
+
+		if (agencys.isEmpty()){
+			log.error("错误");
+			return new DataRtnDTO<>(CustomRtnEnum.ERROR.getStatus(),CustomRtnEnum.ERROR.getMsg(),agencys);
+		}
+
+		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(),CustomRtnEnum.SUCCESS.getMsg(),agencys);
+	}
+
+	public DTO getParkByAgencyId(Long aid) {
+		log.info("获得联动菜单--楼宇");
+		List<DicHouseName> lds = houseResourceMapper.getParkByAgencyId(aid);
+		if (lds.isEmpty()){
+			log.error("错误");
+			return new DataRtnDTO<>(CustomRtnEnum.ERROR.getStatus(),CustomRtnEnum.ERROR.getMsg(),lds);
+		}
+
+		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(),CustomRtnEnum.SUCCESS.getMsg(),lds);
+	}
+
+	public DTO getLdByParkId(Long pid) {
+		log.info("获得联动菜单--楼栋号");
+		List<String> lds = houseResourceMapper.getLdByParkId(pid);
+		if (lds.isEmpty()){
+			log.error("错误");
+			return new DataRtnDTO<>(CustomRtnEnum.ERROR.getStatus(),CustomRtnEnum.ERROR.getMsg(),lds);
+		}
+
+		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(),CustomRtnEnum.SUCCESS.getMsg(),lds);
+	}
+
+	public DTO getRoomByLd(Long pid,String bno) {
+		log.info("获得联动菜单--房号");
+		List<HouseResourceDmenu> lds = houseResourceMapper.getRoomByLd(pid,bno);
+
+		if (lds.isEmpty()){
+			log.error("错误");
+			return new DataRtnDTO<>(CustomRtnEnum.ERROR.getStatus(),CustomRtnEnum.ERROR.getMsg(),lds);
+		}
+
+		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(),CustomRtnEnum.SUCCESS.getMsg(),lds);
+	}
+
+
 }

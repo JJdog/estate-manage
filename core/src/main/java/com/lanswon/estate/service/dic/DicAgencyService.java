@@ -10,7 +10,7 @@ import com.lanswon.commons.web.dto.DTO;
 import com.lanswon.commons.web.rtn.CustomRtnEnum;
 import com.lanswon.commons.web.rtn.DataRtnDTO;
 import com.lanswon.commons.web.rtn.SimpleRtnDTO;
-import com.lanswon.estate.bean.DatabaseConstants;
+import com.lanswon.estate.constant.DatabaseConstants;
 import com.lanswon.estate.bean.pojo.dic.DicAgency;
 import com.lanswon.estate.mapper.DicAgencyMapper;
 import lombok.extern.slf4j.Slf4j;

@@ -12,6 +12,7 @@
         t.build_no,
         t.build_level,
         t.build_room,
+        t.real_location,
         t.resource_area,
         t.yz_area,
         t.wz_area,
@@ -102,6 +103,7 @@
                t.build_no,
                t.build_level,
                t.build_room,
+               t.real_location,
                t.resource_area,
                t.origin_rent_charge,
                t.guide_rent_charge,
@@ -137,15 +139,19 @@
                CONCAT(t2.name, t.park, ifnull(t.build_no, '/'), '栋', ifnull(t.build_level, '/'), '层',
                       ifnull(t.build_room, '')) AS location,
                t.park,
+               t3.fk_house_name_id AS parkId,
                t.build_no,
                t.build_level,
                t.build_room,
+               t.real_location,
                t.resource_area,
                t.yz_area                        AS resourceYzArea,
                t.wz_area                        AS resourceWzArea,
                t.origin_rent_charge,
                t.guide_rent_charge,
                t1.real_money                    AS realRentCharge,
+                t1.resource_usage AS resourceUsageCode,
+               CASE t1.resource_usage WHEN 1 THEN '办公' WHEN 2 THEN '厂房' WHEN 3 THEN  '商铺' END AS resourceUsage,
                t.rent_status                    AS rentCoede,
                t.rent_status,
                t.sell_status                    AS sellCode,
@@ -169,6 +175,42 @@
                  LEFT JOIN dic_house_usage t6 ON t6.id = t3.fk_house_usage
                  LEFT JOIN dic_house_name t7 ON t3.fk_house_name_id = t7.id
         WHERE t1.fk_deal_id = #{id}
+    </select>
+    <select id="getAgencyNameAndIdById" resultType="com.lanswon.estate.bean.pojo.dic.DicAgency">
+        SELECT t.id,t.name FROM dic_agency t WHERE 1 = 1
+        <if test="aid != '' and aid != null">
+            AND t.id = #{aid}
+        </if>
+    </select>
+
+    <select id="getParkByAgencyId" resultType="com.lanswon.estate.bean.pojo.dic.DicHouseName">
+        SELECT t.id, t.name
+        FROM dic_house_name t LEFT JOIN house_assets t1 ON t1.fk_house_name_id = t.id
+        WHERE t1.fk_agency_id = #{aid}
+    </select>
+
+    <select id="getLdByParkId" resultType="java.lang.String">
+        SELECT DISTINCT t.build_no
+        FROM house_resource t
+                 LEFT JOIN house_assets t1 ON t.fk_house_assets_id = t1.id
+        WHERE t1.fk_house_name_id = #{pid}
+    </select>
+
+    <select id="getRoomByLd" resultType="com.lanswon.estate.bean.vo.HouseResourceMenuVO">
+        SELECT t.id,
+               concat(ifnull(t.build_level, '/'), '层', ifnull(t.build_room, '/'), '室') AS resourceName,
+            t.resource_area,
+            t.guide_rent_charge
+        FROM house_resource t
+                 LEFT JOIN house_assets t1 ON t.fk_house_assets_id = t1.id
+        WHERE t1.fk_house_name_id = #{pid}
+          AND t.build_no = #{bno}
+    </select>
+
+    <select id="getAllResourceNameAndId" resultType="java.lang.String">
+        SELECT
+            concat('无锡市蠡园开发区',t1.name,t.park,ifnull(t.build_no,'/'),'栋',ifnull(t.build_level,'/'),'层',ifnull(t.build_room,''),'$',t.id)
+        FROM house_resource t LEFT JOIN dic_agency t1 ON t.fk_agency_id = t1.id
     </select>
 
 </mapper>

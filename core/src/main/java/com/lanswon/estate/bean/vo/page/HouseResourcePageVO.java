@@ -35,6 +35,8 @@ public class HouseResourcePageVO {
 	/** 房号 */
 	private String buildRoom;
 
+	private String realLocation;
+
 	/** 房源面积 */
 	private Double resourceArea;
 

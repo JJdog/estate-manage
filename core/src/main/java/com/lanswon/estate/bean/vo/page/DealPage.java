@@ -2,13 +2,10 @@ package com.lanswon.estate.bean.vo.page;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.lanswon.estate.bean.pojo.RentCharge;
+import com.lanswon.estate.bean.vo.DepositReturnVO;
 import com.lanswon.estate.bean.vo.DetailHouseResourceVO;
 import com.lanswon.estate.bean.vo.MustMoneyVO;
 import com.lanswon.estate.bean.vo.TransFlowVO;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Date;
@@ -24,24 +21,24 @@ import java.util.List;
 public class DealPage {
 
 
-	private long id;
+	private Long id;
 
 	/** 合同编号 */
 	private String dealSerial;
 
 	/** 合同类型 */
-	private int dealTypeCode;
+	private Integer dealTypeCode;
 	private String dealType;
 
 	/** 支付方式 */
-	private int payTypeCode;
+	private Integer payTypeCode;
 	private String payType;
 
 	/** 地址 */
 	private String location;
 
 	/** 承租人 */
-	private long renterId;
+	private Long renterId;
 	private String renter;
 
 	/** 出租人 */
@@ -49,37 +46,44 @@ public class DealPage {
 	private String lessor;
 
 	/** 租赁时长 */
-	private int rentMonth;
+	private Integer rentMonth;
 
 	/** 免租时长 */
-	private int freeRentMonth;
+	private Integer freeRentMonth;
+	/** 免租到期时间 */
+	@JsonFormat(pattern = "yyyy年MM月dd日")
+	private Date freeEndTime;
 
 	/** 是否新租 */
-	private int isNewRentCode;
+	private Integer isNewRentCode;
 	private String isNewRent;
 
 
 	/** 是否有优惠 */
-	private int isHaveDiscountCode;
+	private Integer isHaveDiscountCode;
 	private String isHaveDiscount;
 
+	/** 优惠内容 */
+	private String discount;
+
 	/** 合同存在状态 */
-	private int dealExistStatusCode;
+	private Integer dealExistStatusCode;
 	private String dealExistStatus;
 
 	/** 合同审核状态 */
-	private int dealReviewStatusCode;
+	private Integer dealReviewStatusCode;
 	private String dealReviewStatus;
 
-	@ApiModelProperty(value = "开始时间")
+	/** 开始时间 */
 	@JsonFormat(pattern = "yyyy年MM月dd日")
 	private Date startTime;
 
-	@ApiModelProperty(value = "结束时间")
+	/** 结束时间 */
 	@JsonFormat(pattern = "yyyy年MM月dd日")
 	private Date endTime;
 
-
+	/** 附加内容 */
+	private String extraInfo;
 
 
 	/** 房源信息 */
@@ -90,6 +94,9 @@ public class DealPage {
 
 	/** 收款明细 */
 	List<TransFlowVO> transFlows;
+
+	/** 保证金退还 */
+	List<DepositReturnVO> depositReturns;
 
 
 }

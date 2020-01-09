@@ -1,5 +1,7 @@
 package com.lanswon.estate.bean.vo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.lanswon.commons.core.json.CustomDoubleSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,6 +26,7 @@ public class MustMoneyVO {
 	private String mustDate;
 
 	/** 应收金额 */
+	@JsonSerialize(using = CustomDoubleSerialize.class)
 	private Double money;
 
 	/** 应收状态(正常/不正常) */

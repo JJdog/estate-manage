@@ -33,4 +33,8 @@ public class DealAndHouse extends BasePojo {
 	@NotNull(message = "实际租金不可为空")
 	@ApiModelProperty(value = "实际租金(元/月/平方米)",required = true)
 	private Double realMoney;
+
+	@NotNull(message = "房源用途不可为空")
+	@ApiModelProperty(value = "房源用途")
+	private Integer resourceUsage;
 }

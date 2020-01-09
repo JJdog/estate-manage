@@ -12,7 +12,9 @@ import java.util.Date;
 @Data
 public class DealStopCD {
 
-	private long id;
+	/** 合同ID */
+	private Long id;
 
+	/** 终止时间 */
 	private Date date;
 }

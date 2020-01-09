@@ -5,8 +5,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lanswon.estate.bean.cd.HouseResourceCD;
 import com.lanswon.estate.bean.pojo.HouseResource;
+import com.lanswon.estate.bean.pojo.dic.DicAgency;
+import com.lanswon.estate.bean.pojo.dic.DicHouseName;
 import com.lanswon.estate.bean.vo.DetailHouseResourceVO;
 import com.lanswon.estate.bean.vo.HouseResourceMenuVO;
+import com.lanswon.estate.bean.vo.dmenu.HouseResourceDmenu;
 import com.lanswon.estate.bean.vo.page.HouseResourcePageVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -30,6 +33,10 @@ public interface HouseResourceMapper extends BaseMapper<HouseResource> {
 
 	DetailHouseResourceVO getHouseResourceDetailInfo(long hid);
 
+	@Update("UPDATE house_resource t SET t.rent_status = #{status} WHERE t.id = #{rid} ")
+	boolean updateResourceRentStatus(@Param("rid")Long rid,
+	                                 @Param("status")Integer status);
+
 	/** 房源已出租 */
 	@Update("UPDATE house_resource t SET t.rent_status = #{rent}  WHERE t.id = #{id}")
 	boolean updateResource2HasRented(@Param("id") long id,
@@ -48,4 +55,18 @@ public interface HouseResourceMapper extends BaseMapper<HouseResource> {
 
 	@Select("SELECT resource_area FROM house_resource t WHERE t.id = #{id} ")
 	Double getHouseResourceAreaById(Long id);
+
+
+	List<DicAgency> getAgencyNameAndIdById(Long aid);
+
+	List<DicHouseName> getParkByAgencyId(Long aid);
+
+	List<String> getLdByParkId(Long pid);
+
+	List<HouseResourceDmenu> getRoomByLd(@Param("pid") Long pid,
+	                                     @Param("bno") String bno);
+
+
+	List<String> getAllResourceNameAndId();
+
 }

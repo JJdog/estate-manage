@@ -44,8 +44,8 @@ public class IoRest {
 	}
 
 	@PostMapping(value = "/deal/in")
-	public DTO importDeal(@RequestParam(value = "file")MultipartFile file){
-		return null;
+	public DTO importDeal(@RequestParam(value = "file")MultipartFile file) throws IOException {
+		return ioService.importDeal(file);
 	}
 
 	@PostMapping(value = "/flow/in")

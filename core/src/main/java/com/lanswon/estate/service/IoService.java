@@ -8,11 +8,9 @@ import com.lanswon.commons.core.time.DateTimeUtil;
 import com.lanswon.commons.web.dto.DTO;
 import com.lanswon.commons.web.rtn.CustomRtnEnum;
 import com.lanswon.commons.web.rtn.DataRtnDTO;
-import com.lanswon.estate.bean.po.PoiHouseAssetsPO;
-import com.lanswon.estate.bean.po.PoiHouseResourcePO;
-import com.lanswon.estate.bean.po.PoiLandAssetsPO;
-import com.lanswon.estate.bean.po.PoiTransFlow;
+import com.lanswon.estate.bean.po.*;
 import com.lanswon.estate.bean.vo.PoiResultVO;
+import com.lanswon.estate.listener.DealListener;
 import com.lanswon.estate.listener.HouseAssetsListener;
 import com.lanswon.estate.listener.HouseResourceListener;
 import com.lanswon.estate.mapper.*;
@@ -65,6 +63,11 @@ public class IoService {
 	@Resource
 	private LandAssetsMapper landAssetsMapper;
 	@Resource
+	private HouseResourceMapper houseResourceMapper;
+	@Resource
+	private RenterMapper renterMapper;
+
+	@Resource
 	private PoiLandAssetsMapper poiLandAssetsMapper;
 	@Resource
 	private PoiHouseResourceMapper poiHouseResourceMapper;
@@ -72,6 +75,8 @@ public class IoService {
 	private PoiHouseAssetsMapper poiHouseAssetsMapper;
 	@Resource
 	private PoiTransFlowMapper poiTransFlowMapper;
+	@Resource
+	private PoiDealMapper poiDealMapper;
 
 
 	/** 管理机构名称-id对应关系 */
@@ -94,6 +99,10 @@ public class IoService {
 	private List<String> houseNameAndId;
 	/** 房源类型-id对应关系 */
 	private List<String> resourceTypeAndId;
+	/** 房源名称-id对应关系 */
+	private List<String> resourceNameAndId;
+	/** 承租人-id对应关系 */
+	private List<String> renterNameAndId;
 
 	private void init(){
 		log.info("初始化转换数据");
@@ -107,6 +116,8 @@ public class IoService {
 		landUsageAndId = dicLandUsageMapper.getAllUsageAndId();
 		landNatureAndId = dicLandNatureMapper.getAllNatureAndId();
 		resourceTypeAndId = dicResourceTypeMapper.getAllResourceTypeAndId();
+		resourceNameAndId = houseResourceMapper.getAllResourceNameAndId();
+		renterNameAndId = renterMapper.getAllRenterNameAndId();
 	}
 
 
@@ -210,6 +221,23 @@ public class IoService {
 		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(),CustomRtnEnum.SUCCESS.getMsg(),poiResultVO);
 	}
 
+	/** In合同 */
+	public DTO importDeal(MultipartFile file) throws IOException {
+		log.info("初始化转换信息");
+		init();
+
+
+		/* 汇总数据 */
+		PoiResultVO poiResultVO = new PoiResultVO();
+		poiResultVO.setPoiName("导入合同信息"+ DateTimeUtil.getDateTime());
+
+		// 获得Excel数据
+		EasyExcel.read(file.getInputStream(), PoiDealPO.class, new DealListener(this,this.poiDealMapper)).sheet().doRead();
+
+
+		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(),CustomRtnEnum.SUCCESS.getMsg(),poiResultVO);
+	}
+
 
 
 	/** In流水 */
@@ -300,6 +328,21 @@ public class IoService {
 		}
 
 		return poiHouseResourcePO;
+	}
+
+	/**
+	 * 合同转码
+	 * @param dealPO 合同
+	 * @return 转码后对象
+	 */
+	public PoiDealPO convertDeal2Database(PoiDealPO dealPO) {
+
+		// 房源名称-id转码
+		dealPO.setResourceId(resourceName2Id(dealPO.getResourceName()));
+		// 承租人-id转码
+		dealPO.setFkRenterId(renterName2Id(dealPO.getRenter()));
+
+		return dealPO;
 	}
 
 
@@ -412,5 +455,30 @@ public class IoService {
 		}
 		return null;
 	}
+
+	/** 房源名称转码 */
+	private Long resourceName2Id(String name){
+		for (String s : resourceNameAndId){
+			if (s.startsWith(name)){
+				return Long.valueOf(StringUtils.substringAfter(s, "$"));
+			}
+		}
+		return null;
+	}
+
+	/** 承租人名称转码*/
+	private Long renterName2Id(String name){
+		for (String s : renterNameAndId){
+			if (s.startsWith(name)){
+				return Long.valueOf(StringUtils.substringAfter(s, "$"));
+			}
+		}
+		return null;
+	}
+
+
+
+
+
 
 }

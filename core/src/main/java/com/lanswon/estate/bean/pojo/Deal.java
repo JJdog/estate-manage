@@ -54,6 +54,9 @@ public class Deal extends BasePojo {
 	@ApiModelProperty(value = "是否有优惠(1.有;2.没有)",required = true)
 	private Integer isHaveDiscount;
 
+	@ApiModelProperty(value = "优惠内容")
+	private String discount;
+
 	@NotNull(message = "租赁时长不可为空")
 	@ApiModelProperty(value = "租的月数",required = true)
 	private Integer rentMonth;
@@ -87,5 +90,10 @@ public class Deal extends BasePojo {
 	@ApiModelProperty(value = "保证金",required = true)
 	@TableField(exist = false)
 	private double deposit;
+
+
+	@ApiModelProperty(value = "合同附加条款")
+	private  String extraInfo;
+
 
 }

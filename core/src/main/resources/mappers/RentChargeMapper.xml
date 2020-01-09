@@ -44,7 +44,6 @@
         WHERE DATE_ADD(now(), INTERVAL #{day} DAY) &gt;= t.rent_date
           AND t.is_enable = 1
         GROUP BY t.id
-
     </select>
 
     <select id="getRentChargeInfoByDatePage" resultType="com.lanswon.estate.bean.vo.page.MustMoneyPageVO">

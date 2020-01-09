@@ -14,11 +14,11 @@
         WHEN 3 THEN '挂靠' END AS dealType,
         t.pay_type AS payTypeCode,
         CASE t.pay_type
-        WHEN 1 THEN '一月一付'
-        WHEN 3 THEN '一季度一付'
-        WHEN 6 THEN '半年一付'
-        WHEN 12 THEN '一年一付' END AS payType,
-        group_concat(CONCAT(t3.name,t1.park,ifnull(t1.build_no,'/'),'栋',ifnull(t1.build_level,'/'),'层',ifnull(t1.build_room,''))
+        WHEN 1 THEN '以一个月为周期支付'
+        WHEN 3 THEN '以三个月为一周期支付'
+        WHEN 6 THEN '以六个月为一周期支付'
+        WHEN 12 THEN '以十二个月为一周期支付' END AS payType,
+        group_concat(CONCAT('无锡市蠡园开发区',t3.name,t1.park,ifnull(t1.build_no,'/'),'栋',ifnull(t1.build_level,'/'),'层',ifnull(t1.build_room,''),'(',t2.location,')')
         SEPARATOR ',') AS location,
         t2.fk_own_id AS lessorId,
         t4.name AS lessor,
@@ -26,6 +26,7 @@
         t5.name AS renter,
         t.rent_month,
         t.free_rent_month,
+        date_add(date_add(t.start_time,INTERVAL t.free_rent_month MONTH ),INTERVAL -1 DAY ) AS freeEndTime,
         t.is_new_rent AS isNewRentCode,
         CASE t.is_new_rent
         WHEN 1 THEN '新签'
@@ -34,19 +35,22 @@
         CASE t.is_have_discount
         WHEN 1 THEN '有优惠'
         WHEN 2 THEN '无优惠' END AS isHaveDiscount,
+        t.discount,
         t.deal_exist_status AS dealExistStatusCode,
         CASE t.deal_exist_status
         WHEN 1 THEN '进行中'
         WHEN 2 THEN '已删除'
         WHEN 3 THEN '正常终止'
-        WHEN 4 THEN '提前结束' END AS dealExistStatus,
+        WHEN 4 THEN '提前结束,审核中'
+        WHEN 5 THEN '提前结束,已审核' END AS dealExistStatus,
         t.deal_review_status AS dealReviewStatusCode,
         CASE t.deal_review_status
         WHEN 1 THEN '未审核'
         WHEN 2 THEN '通过审核'
         WHEN 3 THEN '未通过审核' END AS dealReviewStatus,
         t.start_time,
-        t.end_time
+        t.end_time,
+        t.extra_info
         FROM deal t
         LEFT JOIN mid_deal_house t11 ON t11.fk_deal_id = t.id
         LEFT JOIN house_resource t1 ON t11.fk_house_resource_id = t1.id
@@ -151,48 +155,81 @@
         </if>
     </select>
 
-    <select id="getDetailDealInfo" resultType="com.lanswon.estate.bean.vo.DetailDealVO">
-        SELECT t.deal_serial,
-               t.deal_name,
-               t3.name                                                                     AS lessor,
-               t5.name                                                                     AS renter,
-               t.fk_renter_id                                                              AS renterId,
-               group_concat(t1.id SEPARATOR ',')                                           AS resourceId,
-               group_concat(concat(t3.name, t1.park, t1.build_no, '号楼', t1.build_level, '层', t1.build_room) SEPARATOR
-                            ',')                                                           AS location,
-               sum(t1.resource_area)                                                       AS resourceArea,
-               group_concat(t7.name SEPARATOR ',')                                         AS houseUsage,
-               t3.name                                                                     AS agencyName,
-               timestampdiff(MONTH, t.start_time, t.end_time)                              AS rentMonth,
-               (timestampdiff(MONTH, t.start_time, t.end_time) * t1.real_rent_charge *
-                t1.resource_area)                                                          AS monthRentCharge,
+    <select id="getDealWordInfo" resultType="com.lanswon.estate.bean.vo.doc.DealTemp">
+        SELECT t.deal_serial                                                                  AS dealSerial,
+               t4.name                                                                        AS lessor,
+               t5.name                                                                        AS renter,
+               group_concat(t1.real_location SEPARATOR ';')                                   AS location,
+               sum(t1.resource_area)                                                          AS area,
+               CASE t11.resource_usage WHEN 1 THEN '办公' WHEN 2 THEN '厂房' WHEN 3 THEN '商铺' END AS resourceUsage,
+               t.rent_month / 12                                                              AS rentYear,
+               t.start_time,
+               t.end_time,
+               date_format(t.start_time, '%Y年%m月%d日')                                         AS rentStart,
+               date_format(t.end_time, '%Y年%m月%d日')                                           AS rentEnd,
+               t.free_rent_month                                                              AS freeRent,
+               format(sum(t11.real_money * t1.resource_area), 2)                              AS monthMoney,
                CASE t.pay_type
-                   WHEN 1 THEN '一月一付'
-                   WHEN 3 THEN '一季度一付'
-                   WHEN 6 THEN '半年一付'
-                   WHEN 12
-                       THEN '一年一付' END                                                     AS payType,
-               t.pay_type                                                                  AS payTypeCode,
+                   WHEN 1 THEN '(4)'
+                   WHEN 3 THEN '(3)'
+                   WHEN 6 THEN '(2)'
+                   WHEN 12 THEN '(1)' END                                                     AS payType,
+               format(t8.deposit, 2)                                                          AS deposit,
+               t.extra_info
+        FROM deal t
+                 LEFT JOIN mid_deal_house t11 ON t11.fk_deal_id = t.id
+                 LEFT JOIN house_resource t1 ON t11.fk_house_resource_id = t1.id
+                 LEFT JOIN house_assets t2 ON t1.fk_house_assets_id = t2.id
+                 LEFT JOIN dic_assets_co t4 ON t2.fk_own_id = t4.id
+                 LEFT JOIN renter t5 ON t.fk_renter_id = t5.id
+                 LEFT JOIN money_deposit_must t8 ON t8.fk_deal_id = t.id
+        WHERE t.id = #{id}
+    </select>
+
+    <select id="getNoReviewDealInfoPage" resultType="com.lanswon.estate.bean.vo.page.DealPage">
+        SELECT t.id,
+               t.deal_serial,
+               t.deal_type                                                                         AS dealTypeCode,
+               CASE t.deal_type
+                   WHEN 1 THEN '协商出租'
+                   WHEN 2 THEN '一事一议'
+                   WHEN 3 THEN '挂靠' END                                                            AS dealType,
+               t.pay_type                                                                          AS payTypeCode,
+               CASE t.pay_type
+                   WHEN 1 THEN '以一个月为周期支付'
+                   WHEN 3 THEN '以三个月为一周期支付'
+                   WHEN 6 THEN '以六个月为一周期支付'
+                   WHEN 12 THEN '以十二个月为一周期支付' END                                                  AS payType,
+               group_concat(CONCAT(t3.name, t1.park, ifnull(t1.build_no, '/'), '栋', ifnull(t1.build_level, '/'), '层',
+                                   ifnull(t1.build_room, ''))
+                            SEPARATOR ',')                                                         AS location,
+               t2.fk_own_id                                                                        AS lessorId,
+               t4.name                                                                             AS lessor,
+               t.fk_renter_id                                                                      AS renterId,
+               t5.name                                                                             AS renter,
+               t.rent_month,
                t.free_rent_month,
-               t.deal_type                                                                 AS dealTypeCode,
-               CASE t.deal_type WHEN 1 THEN '协商出租' WHEN 2 THEN '一事一议' WHEN 3 THEN '挂靠' END AS dealType,
-               t.is_new_rent                                                               AS rentTypeCode,
-               CASE t.is_new_rent WHEN 1 THEN '新签' WHEN 2 THEN '续签' END                    AS rentType,
-               t8.deposit                                                                  AS deposit,
-               t1.origin_rent_charge,
-               t1.guide_rent_charge,
-               t.deal_exist_status                                                         AS dealExistStatusCode,
+               date_add(date_add(t.start_time, INTERVAL t.free_rent_month MONTH), INTERVAL -1 DAY) AS freeEndTime,
+               t.is_new_rent                                                                       AS isNewRentCode,
+               CASE t.is_new_rent
+                   WHEN 1 THEN '新签'
+                   WHEN 2 THEN '续签' END                                                            AS isNewRent,
+               t.is_have_discount                                                                  AS isHaveDiscountCode,
+               CASE t.is_have_discount
+                   WHEN 1 THEN '有优惠'
+                   WHEN 2 THEN '无优惠' END                                                           AS isHaveDiscount,
+               t.deal_exist_status                                                                 AS dealExistStatusCode,
                CASE t.deal_exist_status
-                   WHEN 1 THEN '正常'
-                   WHEN 2 THEN '已到期'
+                   WHEN 1 THEN '进行中'
+                   WHEN 2 THEN '已删除'
                    WHEN 3 THEN '正常终止'
-                   WHEN 4 THEN '提前结束' END                                                  AS dealExistStatus,
-               t.deal_review_status                                                        AS dealReviewStatusCode,
+                   WHEN 4 THEN '提前结束,审核中'
+                   WHEN 5 THEN '提前结束,已审核' END                                                      AS dealExistStatus,
+               t.deal_review_status                                                                AS dealReviewStatusCode,
                CASE t.deal_review_status
                    WHEN 1 THEN '未审核'
-                   WHEN 2 THEN '审核通过'
-                   WHEN 3
-                       THEN '审核不通过' END                                                    AS dealReviewStatus,
+                   WHEN 2 THEN '通过审核'
+                   WHEN 3 THEN '未通过审核' END                                                         AS dealReviewStatus,
                t.start_time,
                t.end_time
         FROM deal t
@@ -203,55 +240,57 @@
                  LEFT JOIN dic_assets_co t4 ON t2.fk_own_id = t4.id
                  LEFT JOIN renter t5 ON t.fk_renter_id = t5.id
                  LEFT JOIN land_assets t6 ON t2.fk_land_assets_id = t6.id
-                 LEFT JOIN dic_house_usage t7 ON t2.fk_house_usage = t7.id
-                 LEFT JOIN money_deposit_must t8 ON t8.fk_deal_id = t.id
-        WHERE t.id = #{id}
+        WHERE 1 = 1
+          AND t.deal_review_status = 1
+        GROUP BY t.id
     </select>
 
-    <select id="getNoReviewDealInfoPage" resultType="com.lanswon.estate.bean.vo.page.DealPage">
-        SELECT
-            t.id,
-            t.deal_serial,
-            t.deal_type AS dealTypeCode,
-            CASE t.deal_type
-                WHEN 1 THEN '协商出租'
-                WHEN 2 THEN '一事一议'
-                WHEN 3 THEN '挂靠' END AS dealType,
-            t.pay_type AS payTypeCode,
-            CASE t.pay_type
-                WHEN 1 THEN '一月一付'
-                WHEN 3 THEN '一季度一付'
-                WHEN 6 THEN '半年一付'
-                WHEN 12 THEN '一年一付' END AS payType,
-            group_concat(CONCAT(t3.name,t1.park,ifnull(t1.build_no,'/'),'栋',ifnull(t1.build_level,'/'),'层',ifnull(t1.build_room,''))
-                         SEPARATOR ',') AS location,
-            t2.fk_own_id AS lessorId,
-            t4.name AS lessor,
-            t.fk_renter_id AS renterId,
-            t5.name AS renter,
-            t.rent_month,
-            t.free_rent_month,
-            t.is_new_rent AS isNewRentCode,
-            CASE t.is_new_rent
-                WHEN 1 THEN '新签'
-                WHEN 2 THEN '续签' END AS isNewRent,
-            t.is_have_discount AS isHaveDiscountCode,
-            CASE t.is_have_discount
-                WHEN 1 THEN '有优惠'
-                WHEN 2 THEN '无优惠' END AS isHaveDiscount,
-            t.deal_exist_status AS dealExistStatusCode,
-            CASE t.deal_exist_status
-                WHEN 1 THEN '进行中'
-                WHEN 2 THEN '已删除'
-                WHEN 3 THEN '正常终止'
-                WHEN 4 THEN '提前结束' END AS dealExistStatus,
-            t.deal_review_status AS dealReviewStatusCode,
-            CASE t.deal_review_status
-                WHEN 1 THEN '未审核'
-                WHEN 2 THEN '通过审核'
-                WHEN 3 THEN '未通过审核' END AS dealReviewStatus,
-            t.start_time,
-            t.end_time
+    <select id="getStopApply" resultType="com.lanswon.estate.bean.vo.page.DealPage">
+        SELECT t.id,
+               t.deal_serial,
+               t.deal_type                                                                         AS dealTypeCode,
+               CASE t.deal_type
+                   WHEN 1 THEN '协商出租'
+                   WHEN 2 THEN '一事一议'
+                   WHEN 3 THEN '挂靠' END                                                            AS dealType,
+               t.pay_type                                                                          AS payTypeCode,
+               CASE t.pay_type
+                   WHEN 1 THEN '以一个月为周期支付'
+                   WHEN 3 THEN '以三个月为一周期支付'
+                   WHEN 6 THEN '以六个月为一周期支付'
+                   WHEN 12 THEN '以十二个月为一周期支付' END                                                  AS payType,
+               group_concat(CONCAT(t3.name, t1.park, ifnull(t1.build_no, '/'), '栋', ifnull(t1.build_level, '/'), '层',
+                                   ifnull(t1.build_room, ''))
+                            SEPARATOR ',')                                                         AS location,
+               t2.fk_own_id                                                                        AS lessorId,
+               t4.name                                                                             AS lessor,
+               t.fk_renter_id                                                                      AS renterId,
+               t5.name                                                                             AS renter,
+               t.rent_month,
+               t.free_rent_month,
+               date_add(date_add(t.start_time, INTERVAL t.free_rent_month MONTH), INTERVAL -1 DAY) AS freeEndTime,
+               t.is_new_rent                                                                       AS isNewRentCode,
+               CASE t.is_new_rent
+                   WHEN 1 THEN '新签'
+                   WHEN 2 THEN '续签' END                                                            AS isNewRent,
+               t.is_have_discount                                                                  AS isHaveDiscountCode,
+               CASE t.is_have_discount
+                   WHEN 1 THEN '有优惠'
+                   WHEN 2 THEN '无优惠' END                                                           AS isHaveDiscount,
+               t.deal_exist_status                                                                 AS dealExistStatusCode,
+               CASE t.deal_exist_status
+                   WHEN 1 THEN '进行中'
+                   WHEN 2 THEN '已删除'
+                   WHEN 3 THEN '正常终止'
+                   WHEN 4 THEN '提前结束,审核中'
+                   WHEN 5 THEN '提前结束,已审核' END                                                      AS dealExistStatus,
+               t.deal_review_status                                                                AS dealReviewStatusCode,
+               CASE t.deal_review_status
+                   WHEN 1 THEN '未审核'
+                   WHEN 2 THEN '通过审核'
+                   WHEN 3 THEN '未通过审核' END                                                         AS dealReviewStatus,
+               t.start_time,
+               t.end_time
         FROM deal t
                  LEFT JOIN mid_deal_house t11 ON t11.fk_deal_id = t.id
                  LEFT JOIN house_resource t1 ON t11.fk_house_resource_id = t1.id
@@ -261,7 +300,7 @@
                  LEFT JOIN renter t5 ON t.fk_renter_id = t5.id
                  LEFT JOIN land_assets t6 ON t2.fk_land_assets_id = t6.id
         WHERE 1 = 1
-          AND t.deal_review_status = 1
+          AND t.deal_exist_status = 4
         GROUP BY t.id
     </select>
 
@@ -305,38 +344,40 @@
     <select id="getMustMoneyByDealId" resultType="com.lanswon.estate.bean.vo.MustMoneyVO">
         SELECT *
         FROM (
-                 SELECT t.id                                                    AS i,
-                        t.fk_deal_id                                            AS id,
-                        concat(date_format(t1.start_time, '%Y年%m月%d日'), '-保证金') AS mustReason,
-                        date_format(t1.start_time, '%Y年%m月%d日')                 AS mustDate,
-                        t.deposit                                               AS money,
-                     CASE t1.deal_review_status WHEN 2 THEN '正常' ELSE '未启用' END AS payStatus,
-                        concat('保证金')                                           AS moneyType
-                 FROM money_deposit_must t
-                          LEFT JOIN deal t1
-                                    ON t.fk_deal_id = t1.id
-                 UNION ALL
-                 SELECT t.id                                                 AS i,
-                        t.fk_deal_id                                         AS id,
-                        concat(date_format(t.rent_date, '%Y年%m月%d日'), '-租金') AS mustReason,
-                        date_format(t.rent_date, '%Y年%m月%d日')                AS mustDate,
-                        t.must_charge                                        AS money,
-                        CASE t.is_enable WHEN 2 THEN '正常' ELSE '未启用' END AS payStatus,
-                        concat('租金')                                         AS moneyType
-                 FROM money_rent_must t
-                          LEFT JOIN deal t1
-                                    ON t.fk_deal_id = t1.id
-                 UNION ALL
-                 SELECT t.id                                        AS i,
-                        t.fk_deal_id                                AS id,
-                        concat(date_format(now(), '%Y年'), '前-往年欠款') AS mustReason,
-                        date_format(now(), '%Y年')                   AS mustDate,
-                        t.arrears                                   AS money,
-                        CASE t1.deal_review_status WHEN 2 THEN '正常' ELSE '未启用' END AS payStatus,
-                        concat('往年欠款')                              AS moneyType
-                 FROM money_arrears_must t
-                          LEFT JOIN deal t1
-                                    ON t.fk_deal_id = t1.id) a
+        SELECT t.id AS i,
+        t.fk_deal_id AS id,
+        concat(date_format(t1.start_time, '%Y年%m月%d日'), '-保证金') AS mustReason,
+        date_format(t1.start_time, '%Y年%m月%d日') AS mustDate,
+        t.deposit AS money,
+        CASE t1.deal_review_status WHEN 2 THEN '正常' ELSE '未启用' END AS payStatus,
+        concat('保证金') AS moneyType
+        FROM money_deposit_must t
+        LEFT JOIN deal t1
+        ON t.fk_deal_id = t1.id
+        UNION ALL
+        SELECT t.id AS i,
+        t.fk_deal_id AS id,
+        concat(date(t.rent_date), '应收', date(t.rent_date) ,' ~ ' ,date_add(date_add(t.rent_date, INTERVAL t1.pay_type
+        MONTH),INTERVAL -1 DAY ), '租金') AS mustReason,
+        <!--                        concat(date_format(t.rent_date, '%Y年%m月%d日'), '-租金') AS mustReason,-->
+        date_format(t.rent_date, '%Y年%m月%d日') AS mustDate,
+        t.must_charge AS money,
+        CASE t.is_enable WHEN 2 THEN '正常' ELSE '未启用' END AS payStatus,
+        concat('租金') AS moneyType
+        FROM money_rent_must t
+        LEFT JOIN deal t1
+        ON t.fk_deal_id = t1.id
+        UNION ALL
+        SELECT t.id AS i,
+        t.fk_deal_id AS id,
+        concat(date_format(now(), '%Y年'), '前-往年欠款') AS mustReason,
+        date_format(now(), '%Y年') AS mustDate,
+        t.arrears AS money,
+        CASE t1.deal_review_status WHEN 2 THEN '正常' ELSE '未启用' END AS payStatus,
+        concat('往年欠款') AS moneyType
+        FROM money_arrears_must t
+        LEFT JOIN deal t1
+        ON t.fk_deal_id = t1.id) a
         WHERE a.id = #{id}
         ORDER BY a.i ASC;
     </select>
@@ -383,17 +424,34 @@
 
 
     <select id="getMonthRentByDealId" resultType="java.lang.Double">
-        SELECT t.real_money * t1.resource_area
+        SELECT SUM(t.real_money * t1.resource_area)
         FROM mid_deal_house t
-          LEFT JOIN estate.house_resource t1 ON t.fk_house_resource_id = t1.id
+                 LEFT JOIN estate.house_resource t1 ON t.fk_house_resource_id = t1.id
         WHERE t.fk_deal_id = #{id}
     </select>
 
     <select id="getHouseResourceIdByDealId" resultType="java.lang.Long">
         SELECT t1.fk_house_resource_id
         FROM deal t
-            LEFT JOIN mid_deal_house t1 ON t1.fk_deal_id = t.id
+                 LEFT JOIN mid_deal_house t1 ON t1.fk_deal_id = t.id
         WHERE t.id = #{id}
+    </select>
+    <select id="getDealEndtimeByHouseId" resultType="java.util.Date">
+        SELECT t.end_time
+        FROM deal t
+                 LEFT JOIN mid_deal_house t1 ON t1.fk_deal_id = t.id
+        WHERE t1.fk_house_resource_id = #{hid}
+    </select>
+    <select id="getDealInfo2Backup" resultType="com.lanswon.estate.bean.pojo.backup.BackupDeal">
+        SELECT t.id AS fkDealId,
+            t4.name AS jfName,
+            t5.name AS yfName
+        FROM deal t
+            LEFT JOIN mid_deal_house t1 ON t1.fk_deal_id = t.id
+            LEFT JOIN house_resource t2 ON t1.fk_house_resource_id = t2.id
+            LEFT JOIN house_assets t3 ON t2.fk_house_assets_id = t3.id
+            LEFT JOIN dic_assets_co t4 ON t3.fk_own_id = t4.id
+            LEFT JOIN renter t5 ON t.fk_renter_id = t5.id
     </select>
 
 

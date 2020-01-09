@@ -8,7 +8,7 @@ import com.lanswon.commons.web.dto.DTO;
 import com.lanswon.commons.web.rtn.CustomRtnEnum;
 import com.lanswon.commons.web.rtn.DataRtnDTO;
 import com.lanswon.commons.web.rtn.SimpleRtnDTO;
-import com.lanswon.estate.bean.PojoConstants;
+import com.lanswon.estate.constant.PojoConstants;
 import com.lanswon.estate.bean.cd.RentCD;
 import com.lanswon.estate.bean.pojo.Deal;
 import com.lanswon.estate.bean.pojo.DealAndHouse;
@@ -63,24 +63,24 @@ public class RentChargeService {
 		log.info("获得合同id为:{}的合同&租金信息", id);
 		DetailRentChargeVO detailRentChargeVO = new DetailRentChargeVO();
 
-		DetailDealVO detailDealInfo = dealMapper.getDetailDealInfo(id);
-
-		// 合同详情
-		if (detailDealInfo == null) {
-			log.error("合同id：{}的资源{}", id, CustomRtnEnum.RESOURCE_NON_EXIST.toString());
-			return new SimpleRtnDTO(CustomRtnEnum.RESOURCE_NON_EXIST.getStatus(), CustomRtnEnum.RESOURCE_NON_EXIST.getMsg());
-		}
-
-		// 租金详情
-		List<MonthRentChargeVO> monthRentChargeList = rentChargeMapper.getRentChargeInfoByDealId(id);
-
-		if (monthRentChargeList.isEmpty()) {
-			log.error("合同id：{}的收款月节点月租金为{}", id, CustomRtnEnum.RESOURCE_NON_EXIST.toString());
-			return new SimpleRtnDTO(CustomRtnEnum.RESOURCE_NON_EXIST.getStatus(), CustomRtnEnum.RESOURCE_NON_EXIST.getMsg());
-		}
-
-		detailRentChargeVO.setDetailDeal(detailDealInfo);
-		detailRentChargeVO.setMonthRentCharge(monthRentChargeList);
+		//DetailDealVO detailDealInfo = dealMapper.getDetailDealInfo(id);
+		//
+		//// 合同详情
+		//if (detailDealInfo == null) {
+		//	log.error("合同id：{}的资源{}", id, CustomRtnEnum.RESOURCE_NON_EXIST.toString());
+		//	return new SimpleRtnDTO(CustomRtnEnum.RESOURCE_NON_EXIST.getStatus(), CustomRtnEnum.RESOURCE_NON_EXIST.getMsg());
+		//}
+		//
+		//// 租金详情
+		//List<MonthRentChargeVO> monthRentChargeList = rentChargeMapper.getRentChargeInfoByDealId(id);
+		//
+		//if (monthRentChargeList.isEmpty()) {
+		//	log.error("合同id：{}的收款月节点月租金为{}", id, CustomRtnEnum.RESOURCE_NON_EXIST.toString());
+		//	return new SimpleRtnDTO(CustomRtnEnum.RESOURCE_NON_EXIST.getStatus(), CustomRtnEnum.RESOURCE_NON_EXIST.getMsg());
+		//}
+		//
+		//detailRentChargeVO.setDetailDeal(detailDealInfo);
+		//detailRentChargeVO.setMonthRentCharge(monthRentChargeList);
 
 		log.info(CustomRtnEnum.SUCCESS.toString());
 		return new DataRtnDTO<>(CustomRtnEnum.SUCCESS.getStatus(), CustomRtnEnum.SUCCESS.getMsg(), detailRentChargeVO);
@@ -174,7 +174,6 @@ public class RentChargeService {
 						rentCharge.setMustCharge(new BigDecimal(rentMonth * monthRent).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
 					} else {
 						/* 头租金 */
-						//int headMonthRent =(int) Math.ceil(DateTimeUtil.getDaysToEndOfMonth(deal.getStartTime()) * (monthRent / 30));
 						double headMonthRent = DateTimeUtil.getDaysToEndOfMonth(deal.getStartTime()) * (monthRent * 12 / 365);
 						/* 头租金 + 一个循环单位-1月的钱 */
 						rentCharge.setMustCharge(new BigDecimal(headMonthRent + monthRent * (rentMonth - 1)).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
@@ -182,7 +181,6 @@ public class RentChargeService {
 				} else if (i == k - 1) {
 					/*=======最后一次交=======*/
 					/* 尾租金 */
-					//int footMonthRent = (int) Math.ceil(DateTimeUtil.getDaysToStartOfMonth(deal.getEndTime()) * (monthRent / 30));
 					double footMonthRent = DateTimeUtil.getDaysToStartOfMonth(deal.getEndTime()) * (monthRent * 12 / 365);
 					/* 尾租金 + 一个循环单位-1 */
 					rentCharge.setMustCharge(new BigDecimal(footMonthRent + monthRent * rentMonth).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
@@ -190,7 +188,6 @@ public class RentChargeService {
 					rentCharge.setRentDate(DateTimeUtil.getDayOfMonth(mustRentCalendar.getTime(), 1).getTime());
 				} else {
 					/*=======正常交=======*/
-					//rentCharge.setMustCharge(monthRent * rentMonth);
 					rentCharge.setMustCharge(new BigDecimal(rentMonth * monthRent).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
 					/* 每月一号收钱 */
 					rentCharge.setRentDate(DateTimeUtil.getDayOfMonth(mustRentCalendar.getTime(), 1).getTime());
@@ -200,6 +197,26 @@ public class RentChargeService {
 			// 租金列表
 			rentCharges.add(rentCharge);
 		}
+
+		// 考虑免租金
+		if (deal.getFreeRentMonth() != 0){
+
+			/* 免收的总计金额 */
+			double freeRent = deal.getFreeRentMonth() * monthRent;
+			int i = 0;
+			while (freeRent > 0){
+				RentCharge rentCharge = rentCharges.get(i);
+				freeRent = freeRent - rentCharge.getMustCharge();
+				if (freeRent >= 0){
+					rentCharge.setMustCharge(0);
+				}else {
+					rentCharge.setMustCharge(new BigDecimal(Math.abs(freeRent)).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
+				}
+				rentCharges.set(i, rentCharge);
+				i++;
+			}
+		}
+
 		return rentCharges;
 	}
 
@@ -214,25 +231,30 @@ public class RentChargeService {
 
 		// 0.获得最近的两个收租节点(第一个是最后一次收租节点)
 		RentChargeHasDateAndLastNoDateVO hasDateAndLastNoDateVO = new RentChargeHasDateAndLastNoDateVO();
-
+		Deal deal = dealMapper.selectById(id);
 		// 最后一次交租日期
 		Date lastDate = rentChargeMapper.getLastHasRentedDateByDealId(id);
 
-		Date lastDateAddMonth = DateTimeUtil.addMonth(lastDate, dealMapper.getPermonthByDealId(id)).getTime();
-		// 应收天数
-		long daysBtDate = DateTimeUtil.getDaysBtDate(lastDateAddMonth, date);
+		long daysBtDate = 0L;
 
-		double tail = dealMapper.getMonthRentByDealId(id) * 12 /360 * daysBtDate;
+		if (lastDate == null){
+			daysBtDate = DateTimeUtil.getDaysBtDate(deal.getStartTime() , date);
+		}else {
+			Date lastDateAddMonth = DateTimeUtil.addMonth(lastDate, dealMapper.getPermonthByDealId(id)).getTime();
+			// 应收天数
+			DateTimeUtil.getDaysBtDate(lastDateAddMonth, date);
+		}
 
-		// 生成尾款
-		//double tail = rentChargeMapper.generateTail(id, date);
+
+		double tail = dealMapper.getMonthRentByDealId(id) * 12 / 365 * daysBtDate;
+
 
 		RentCharge rentCharge = new RentCharge();
 		rentCharge.setFkDealId(id);
 		rentCharge.setRentDate(date);
-		// 这个租金默认启用
-		rentCharge.setIsEnable(PojoConstants.MUST_NORMAL);
-		rentCharge.setMustCharge(new BigDecimal(tail).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
+		// 这个租金(不启用)
+		rentCharge.setIsEnable(PojoConstants.MUST_NOT_AVAILABLE);
+		rentCharge.setMustCharge(new BigDecimal(tail).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
 		// 插入尾款
 		if (rentChargeMapper.insert(rentCharge) == 0) {
 			log.error("插入尾款租金信息失败");

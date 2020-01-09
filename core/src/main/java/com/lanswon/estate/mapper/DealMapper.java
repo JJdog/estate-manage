@@ -5,12 +5,17 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lanswon.estate.bean.cd.DealCD;
 import com.lanswon.estate.bean.pojo.Deal;
+import com.lanswon.estate.bean.pojo.backup.BackupDeal;
 import com.lanswon.estate.bean.vo.*;
+import com.lanswon.estate.bean.vo.doc.DealTemp;
 import com.lanswon.estate.bean.vo.page.DealPage;
 import com.lanswon.estate.bean.vo.page.NoRentDealPage;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -20,7 +25,11 @@ public interface DealMapper extends BaseMapper<Deal> {
 	IPage<DealPage> getDealInfoPage(@Param(value = "page") Page<Object> page,
 	                                @Param(value = "cd") DealCD cd);
 
-	DetailDealVO getDetailDealInfo(long id);
+	DealTemp getDealWordInfo(long id);
+
+	@Update("UPDATE deal t SET t.deal_exist_status = #{status} WHERE t.id = #{did} ")
+	boolean updateDealRunStatus(@Param("did") Long did,
+	                            @Param("status") Integer status);
 
 	/**
 	 * 审核合同
@@ -29,8 +38,8 @@ public interface DealMapper extends BaseMapper<Deal> {
 	 * @return 审核结果
 	 */
 	@Update("UPDATE deal t SET t.deal_review_status = #{status} WHERE t.id = #{id}")
-	boolean reviewDeal(@Param("id") long id,
-	                   @Param("status") int status);
+	boolean updateDealReviewStatus(@Param("id") Long id,
+	                               @Param("status") Integer status);
 
 	/**
 	 * 终止合同(提前)
@@ -72,7 +81,8 @@ public interface DealMapper extends BaseMapper<Deal> {
 	 */
 	IPage<DealPage> getNoReviewDealInfoPage(Page<Object> objectPage,
 	                                              @Param("cd") DealCD cd);
-
+	IPage<DealPage> getStopApply(Page<Object> objectPage,
+	                             @Param("cd") DealCD cd);
 	/**
 	 * 获得预警合同信息
 	 * @param objectPage 分页
@@ -97,4 +107,9 @@ public interface DealMapper extends BaseMapper<Deal> {
 
 
 	double getMonthRentByDealId(long id);
+
+	Date getDealEndtimeByHouseId(Long hid);
+
+
+	BackupDeal getDealInfo2Backup(long id);
 }

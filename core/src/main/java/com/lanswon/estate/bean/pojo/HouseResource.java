@@ -52,6 +52,9 @@ public class HouseResource extends BasePojo {
 	@ApiModelProperty(value = "房间号")
 	private String buildRoom;
 
+	@ApiModelProperty(value = "合同地址")
+	private String realLocation;
+
 	@ApiModelProperty(value = "房源面积", hidden = true)
 	private Double resourceArea;
 

@@ -1,6 +1,8 @@
 package com.lanswon.estate.bean.vo;
 
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.lanswon.commons.core.json.CustomDoubleSerialize;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -25,12 +27,16 @@ public class DetailHouseResourceVO implements Serializable {
 
 	/** 楼宇*/
 	private String park;
+	private Long parkId;
 	/** 楼号 */
 	private String buildNo;
 	/** 楼层 */
 	private String buildLevel;
 	/** 房间号 */
 	private String buildRoom;
+
+	/** 合同房源地址 */
+	private String realLocation;
 
 	/** 房源总面积面积 */
 	private Double resourceArea;
@@ -40,11 +46,18 @@ public class DetailHouseResourceVO implements Serializable {
 	private Double resourceWzArea;
 
 	/** 历史租金 */
+	@JsonSerialize(using = CustomDoubleSerialize.class)
 	private Double originRentCharge;
 	/** 指导价 */
+	@JsonSerialize(using = CustomDoubleSerialize.class)
 	private Double guideRentCharge;
 	/** 合同价 */
+	@JsonSerialize(using = CustomDoubleSerialize.class)
 	private Double realRentCharge;
+
+	/** 房源用途 */
+	private Integer resourceUsageCode;
+	private String resourceUsage;
 
 	/** 出租状态 */
 	private Integer rentCode;

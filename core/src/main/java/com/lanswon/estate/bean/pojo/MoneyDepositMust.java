@@ -3,6 +3,7 @@ package com.lanswon.estate.bean.pojo;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.lanswon.commons.web.pojo.BasePojo;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
@@ -21,10 +22,15 @@ import lombok.*;
 public class MoneyDepositMust extends BasePojo {
 
 	@ApiModelProperty(value = "合同id")
-    private long fkDealId;
+    private Long fkDealId;
 
 	@ApiModelProperty(value = "保证金")
-    private double deposit;
+    private Double deposit;
+
+	@ApiModelProperty(value = "状态")
+	private Integer isEnable;
+
+
 
 
 

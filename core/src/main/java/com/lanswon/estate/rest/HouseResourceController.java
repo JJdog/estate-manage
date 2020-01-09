@@ -70,4 +70,29 @@ public class HouseResourceController {
 		return houseResourceService.getNoRentHouseResource();
 	}
 
+	@GetMapping("/agency")
+	@ApiOperation(value = "联动菜单-管理单位")
+	public DTO getAgencyNameAndIdById(@RequestParam(value = "aid")Long aid){
+		return houseResourceService.getAgencyNameAndIdById(aid);
+	}
+
+	@GetMapping("/park")
+	@ApiOperation(value = "联动菜单-楼宇")
+	public DTO getParkByAgencyId(@RequestParam(value = "aid")Long aid){
+		return houseResourceService.getParkByAgencyId(aid);
+	}
+
+	@GetMapping("/ld")
+	@ApiOperation(value = "联动菜单-楼号")
+	public DTO getLdByParkId(@RequestParam(value = "pid")Long pid){
+		return houseResourceService.getLdByParkId(pid);
+	}
+
+	@GetMapping("/room")
+	@ApiOperation(value = "联动菜单-房号")
+	public DTO getRoomByLd(@RequestParam(value = "pid") Long pid,
+	                       @RequestParam(value = "bno")String bno){
+		return houseResourceService.getRoomByLd(pid,bno);
+	}
+
 }

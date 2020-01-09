@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lanswon.estate.mapper.DealAndHouseMapper">
+
+
+    <select id="getDealAndHouseInfo2Backup"
+            resultType="com.lanswon.estate.bean.pojo.backup.BackupMidDealHouse">
+        SELECT
+            t.fk_deal_id,
+            t2.real_location AS resourceName,
+            t.fk_house_resource_id AS fkResourceId,
+            t2.resource_area ,
+            t.real_money,
+            CASE t.resource_usage
+                WHEN 1 THEN '办公'
+                WHEN 2 THEN '厂房'
+                WHEN 3 THEN  '商铺' END AS resourceUsage
+        FROM mid_deal_house t
+        LEFT JOIN deal t1 ON t1.id = t.fk_deal_id
+        LEFT JOIN house_resource t2 ON t2.id = t.fk_house_resource_id
+    </select>
+</mapper>
+    

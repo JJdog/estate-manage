@@ -53,12 +53,16 @@ public interface RentChargeMapper extends BaseMapper<RentCharge> {
 	@Delete("DELETE FROM money_rent_must WHERE fk_deal_id = #{id} ")
 	boolean deleteByDealId(@Param("id") long id);
 
+	/** 【修改】租金状态 */
 	@Update("UPDATE money_rent_must t SET t.is_enable = #{enable}  WHERE t.fk_deal_id = #{id} ")
-	boolean enableRentCharge(@Param("id") long id,
-	                         @Param("enable") int enable);
+	boolean updateMustRentStatus(@Param("id") Long id,
+	                             @Param("enable") Integer enable);
 
-	@Update("UPDATE money_rent_must t SET t.is_enable = 3 WHERE t.fk_deal_id = #{id} ")
-	boolean recallRentChargeByDealId(long id);
+	/** 【修改】保证金状态 */
+	@Update("UPDATE money_deposit_must t SET t.is_enable = #{status} WHERE t.fk_deal_id = #{id} ")
+	boolean updateDepositStatus(@Param("id") long id,
+	                            @Param("status") int status);
+
 
 	IPage<SimpleWarnRentVO> getRentWarnPage(@Param("page") Page<Object> objectPage,
 	                                        @Param("asc") int asc ,
@@ -71,8 +75,6 @@ public interface RentChargeMapper extends BaseMapper<RentCharge> {
 	@Select("SELECT t.rent_date  FROM money_rent_must t WHERE t.is_enable = 2 AND t.fk_deal_id = #{id} ORDER BY t.rent_date DESC LIMIT 1")
 	Date getLastHasRentedDateByDealId(long id);
 
-	@Select("SELECT t.rent_date FROM money_rent_must t WHERE t.is_enable = 3 ORDER BY t.rent_date ASC ")
-	Date getNextRentDate(long id);
 
 	IPage<MustMoneyPageVO> getRentChargeInfoByDatePage(@Param("page") Page page,
 	                                                   @Param("cd") RentCD cd);

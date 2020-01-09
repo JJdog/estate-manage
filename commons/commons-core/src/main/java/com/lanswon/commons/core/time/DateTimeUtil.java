@@ -5,9 +5,11 @@ package com.lanswon.commons.core.time;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.time.temporal.UnsupportedTemporalTypeException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * 日期/时间工具类
@@ -17,7 +19,7 @@ import java.util.Date;
  *     对时间格式返回进行了基本的封装，提拱了几种时间格式
  * </p>
  * <P>
- *     {@link java.util}中对时间的操作的类不是安全的，Java8提供了新的日期时间类来操作
+ *     {@link java.util.Date}中对时间的操作的类不是安全的，Java8提供了新的日期时间类来操作
  * </P>
  *
  * @see LocalDate
@@ -30,6 +32,63 @@ import java.util.Date;
  *
  */
 public final class DateTimeUtil {
+
+
+	/*====================================时间类型转化============================================*/
+
+	/**
+	 * Date转化成为LocalDateTime
+	 * @param date date
+	 * @return localDateTime
+	 */
+	public static LocalDateTime convertDate2LocalDateTime(Date date){
+		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+	}
+
+	/**
+	 * Date转化成为LocalDate
+	 * @param date date
+	 * @return localDate
+	 */
+	public static LocalDate convertDate2LocalDate(Date date){
+		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+	}
+
+	/**
+	 * Date转化成为LocalTime
+	 * @param date date
+	 * @return localTime
+	 */
+	public static LocalTime convertDate2LocalTime(Date date){
+		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
+	}
+
+	public static Date convert2Date(LocalDateTime dateTime){
+		return Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
+	}
+
+	public static Date convert2Date(LocalDate date){
+		return Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
+	}
+
+
+
+	/*====================================时间计算============================================*/
+
+
+
+
+	/*====================================时间格式化============================================*/
+
+	public static String format(LocalDateTime dateTime,DateFormatEnum formatEnum){
+		return DateTimeFormatter.ofPattern(formatEnum.getValue()).format(dateTime);
+	}
+
+	public static String format(LocalDate localDate,DateFormatEnum formatEnum){
+		return DateTimeFormatter.ofPattern(formatEnum.getValue()).format(localDate);
+	}
+
+
 
 	/**
 	 * 获得日期(默认:2018-10-10)
@@ -115,6 +174,26 @@ public final class DateTimeUtil {
 		return calendar.getActualMaximum(Calendar.DAY_OF_MONTH) - calendar.get(Calendar.DAY_OF_MONTH) + 1;
 	}
 
+	/** 获得日期的月尾日期 */
+	public static Calendar getEndDateOfMonth(Date date){
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+		return calendar;
+	}
+
+	/** 格式化时间 */
+	public static String formatDatetime(Date date,String format){
+		return formatDatetime(date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(), format);
+	}
+
+	/** 格式化时间 */
+	public static String formatDatetime(LocalDateTime dateTime ,String format){
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format, Locale.CHINESE);
+		return formatter.format(dateTime);
+	}
+
+
 	public static int getDaysToStartOfMonth(Date date){
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
@@ -130,14 +209,6 @@ public final class DateTimeUtil {
 
 	/*=======================转换==========================*/
 
-
-
-	public static LocalDateTime convertDate2LocalDateTime(Date date){
-		Instant instant = date.toInstant();
-		ZoneId zoneId = ZoneId.systemDefault();
-
-		return instant.atZone(zoneId).toLocalDateTime();
-	}
 
 
 	public static int getMonthsBtDate(Date d1,Date d2){
